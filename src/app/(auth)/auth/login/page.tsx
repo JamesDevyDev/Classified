@@ -40,7 +40,7 @@ export default function LoginPage() {
             </div>
 
             {/* Right Side - Form */}
-            <div className="flex flex-1 justify-center items-center p-8 md:p-16">
+            <div className="flex flex-1 justify-center items-center p-8 md:p-16 bg-white">
                 <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-lg">
                     <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
                         Welcome Back
@@ -63,7 +63,7 @@ export default function LoginPage() {
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 placeholder="Enter your username"
-                                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black"
                                 required
                                 autoComplete="username"
                             />
@@ -82,7 +82,7 @@ export default function LoginPage() {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="Enter your password"
-                                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black"
                                 required
                                 autoComplete="current-password"
                             />

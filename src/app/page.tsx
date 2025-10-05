@@ -32,23 +32,23 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="px-6 md:px-20 py-20">
+      <section id="features" className="px-6 md:px-20 py-20 bg-white ">
         <h3 className="text-3xl font-bold text-center text-gray-800 mb-12">Features</h3>
         <div className="grid md:grid-cols-3 gap-10">
           <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition">
-            <h4 className="text-xl font-semibold mb-4">Smart Scheduling</h4>
+            <h4 className="text-xl font-semibold mb-4 text-gray-800">Smart Scheduling</h4>
             <p className="text-gray-600">
               Automatically detect conflicts and optimize your schedule with intelligent algorithms.
             </p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition">
-            <h4 className="text-xl font-semibold mb-4">Resource Management</h4>
+            <h4 className="text-xl font-semibold mb-4 text-gray-800">Resource Management</h4>
             <p className="text-gray-600">
               Keep track of classrooms, labs, and equipment so that everything runs smoothly.
             </p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition">
-            <h4 className="text-xl font-semibold mb-4">Easy Enrollment</h4>
+            <h4 className="text-xl font-semibold mb-4 text-gray-800">Easy Enrollment</h4>
             <p className="text-gray-600">
               Let students register, manage waitlists, and receive notifications about classes.
             </p>
