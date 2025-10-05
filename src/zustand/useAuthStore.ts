@@ -20,8 +20,9 @@ const useAuthStore = create<AuthStore>((set, get) => ({
                 return null;
             }
             const data = await res.json();
-            set({ authUser: data });
+            set({ authUser: data })
             return data;
+
         } catch (error) {
             console.log(error);
             return null;
