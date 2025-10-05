@@ -35,7 +35,8 @@ const useAuthStore = create<AuthStore>((set, get) => ({
                 headers: {
                     'content-type': 'application/json'
                 },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ username, password }),
+                credentials: 'include', // ✅ this allows cookies to be stored
             })
             const data = await res.json()
             if (!res.ok) return data
