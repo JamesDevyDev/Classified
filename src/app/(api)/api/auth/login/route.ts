@@ -31,7 +31,7 @@ export const POST = async (request: Request) => {
     const response = NextResponse.json(ifExist)
 
     response.cookies.set('jwt', token, {
-        httpOnly: true,
+        httpOnly: false,
         secure: true,
         path: '/',
         maxAge: 60 * 60 * 24 * 14
