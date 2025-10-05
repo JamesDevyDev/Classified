@@ -16,26 +16,31 @@ const generateToken = ({ id }: { id: string }) => {
 }
 
 export const POST = async (request: Request) => {
-    await connectDb()
+    try {
+        await connectDb()
 
-    const body = await request.json()
-    const { username, password } = body
+        const body = await request.json()
+        const { username, password } = body
 
-    const ifExist = await User.findOne({ username: username })
-    if (!ifExist) return NextResponse.json({ error: "User doesn't exist." }, { status: 400 })
-    const isMatched = await bcrypt.compare(password, ifExist.password)
-    if (!isMatched) return NextResponse.json({ error: "Password does not match." }, { status: 400 })
+        const ifExist = await User.findOne({ username: username })
+        if (!ifExist) return NextResponse.json({ error: "User doesn't exist." }, { status: 400 })
+        const isMatched = await bcrypt.compare(password, ifExist.password)
+        if (!isMatched) return NextResponse.json({ error: "Password does not match." }, { status: 400 })
 
-    const token = generateToken({ id: ifExist._id })
+        const token = generateToken({ id: ifExist._id })
 
-    const response = NextResponse.json(ifExist)
+        const response = NextResponse.json(ifExist)
 
-    response.cookies.set('jwt', token, {
-        httpOnly: true,
-        secure: true,
-        path: '/',
-        maxAge: 60 * 60 * 24 * 14
-    })
+        response.cookies.set('jwt', token, {
+            httpOnly: true,
+            secure: true,
+            path: '/',
+            maxAge: 60 * 60 * 24 * 14
+        })
 
-    return response
+        return response
+    } catch (error) {
+        console.error("LOGIN ERROR:", error) // 👈 will show in Vercel logs
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+    }
 }
