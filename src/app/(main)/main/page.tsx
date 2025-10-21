@@ -1,39 +1,44 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import useAuthStore from '@/zustand/useAuthStore'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
-
 
 const Main = () => {
     const router = useRouter()
-    const { authUser, getLoggedInUser } = useAuthStore()
-
-    const [role, setRole] = useState('')
-
-    // useEffect(() => {
-    //     { authUser?.role === 'admin' && router.push("/main/admin-dashboard") }
-    //     { authUser?.role === 'student' && router.push("/main/student-dashboard") }
-    //     { authUser?.role === 'teacher' && router.push("/main/teacher-dashboard") }
-    // }, [])
+    const { getLoggedInUser } = useAuthStore()
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         const upTime = async () => {
-            const user = await getLoggedInUser()
-            console.log(user)
+            try {
+                const user = await getLoggedInUser()
+                console.log(user)
 
-            { user?.role === 'admin' && router.push("/main/admin-dashboard") }
-            { user?.role === 'student' && router.push("/main/student-dashboard") }
-            { user?.role === 'teacher' && router.push("/main/teacher-dashboard") }
+                if (user?.role === 'admin') router.push("/main/admin-dashboard")
+                else if (user?.role === 'student') router.push("/main/student-dashboard")
+                else if (user?.role === 'teacher') router.push("/main/teacher-dashboard")
+                else setLoading(false) // unknown role or not redirected
+            } catch (error) {
+                console.error("Error fetching user:", error)
+                setLoading(false)
+            }
         }
 
         upTime()
     }, [])
 
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <span className="loading loading-spinner loading-lg text-primary"></span>
+            </div>
+        )
+    }
+
     return (
-        <div>
-            Hello you are logged in as {role}
+        <div className="text-center mt-10">
+            Unable to determine role or not logged in.
         </div>
     )
 }

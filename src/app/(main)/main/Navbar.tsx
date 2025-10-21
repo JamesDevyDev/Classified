@@ -25,7 +25,7 @@ const Navbar = () => {
                 <a href="/profile" className="text-gray-700 hover:text-indigo-600">
                     Profile
                 </a>
-                <button className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700" onClick={() => {
+                <button className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 cursor-pointer" onClick={() => {
                     logoutFunction()
                     setTimeout(() => {
                         router.push('/')

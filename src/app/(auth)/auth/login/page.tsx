@@ -1,13 +1,23 @@
 'use client'
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import useAuthStore from "@/zustand/useAuthStore";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
     const router = useRouter();
-    const { loginFunction } = useAuthStore();
+    const { loginFunction, getLoggedInUser } = useAuthStore();
+
+    useEffect(() => {
+        const getUser = async () => {
+            const user = await getLoggedInUser()
+
+            if (user) router.push('/main')
+        }
+
+        getUser()
+    }, [])
 
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
