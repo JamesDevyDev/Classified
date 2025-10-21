@@ -71,7 +71,6 @@ export default function TeacherDashboard() {
     const [showAddStudentModal, setShowAddStudentModal] = useState(false);
     const [selectedStudentIds, setSelectedStudentIds] = useState<number[]>([]);
 
-    // Database of all available students
     const allStudents: Student[] = [
         { id: 1, name: "Alice Johnson", email: "alice@school.com", grade: "A" },
         { id: 2, name: "Bob Smith", email: "bob@school.com", grade: "B+" },
@@ -171,20 +170,20 @@ export default function TeacherDashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 flex flex-col">
-            
-
+        <div className="min-h-screen bg-slate-900 flex flex-col">
             {/* Main Content */}
             <div className="flex flex-col md:flex-row flex-1 p-6 md:p-10 gap-6">
                 {/* Sidebar */}
-                <aside className="md:w-1/4 bg-white p-6 rounded-xl shadow-md h-fit">
-                    <h2 className="text-xl font-semibold mb-4">My Classes</h2>
-                    <ul className="space-y-2 text-gray-700">
+                <aside className="md:w-1/4 bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl shadow-xl border border-slate-700">
+                    <h2 className="text-xl font-semibold mb-4 text-white">My Classes</h2>
+                    <ul className="space-y-2">
                         {classes.map((cls) => (
                             <li
                                 key={cls.id}
                                 onClick={() => setSelectedClass(cls)}
-                                className={`px-3 py-2 rounded-lg hover:bg-indigo-100 cursor-pointer transition ${selectedClass?.id === cls.id ? "bg-indigo-600 text-white" : "bg-indigo-50"
+                                className={`px-3 py-2 rounded-lg cursor-pointer transition border ${selectedClass?.id === cls.id
+                                        ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/50"
+                                        : "bg-slate-700/50 text-slate-200 border-slate-600/50 hover:bg-cyan-500/10 hover:text-cyan-300"
                                     }`}
                             >
                                 {cls.course}
@@ -193,7 +192,7 @@ export default function TeacherDashboard() {
                     </ul>
                     <button
                         onClick={() => setShowAddModal(true)}
-                        className="mt-6 w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition flex items-center justify-center gap-2"
+                        className="mt-6 w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white py-2 rounded-lg hover:from-cyan-400 hover:to-blue-400 transition flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 font-semibold"
                     >
                         <Plus size={18} /> Add New Class
                     </button>
@@ -201,17 +200,17 @@ export default function TeacherDashboard() {
 
                 {/* Main Section */}
                 <main className="flex-1">
-                    <h2 className="text-2xl font-bold mb-6 text-gray-800">Class Overview</h2>
+                    <h2 className="text-2xl font-bold mb-6 text-white">Class Overview</h2>
 
                     <div className="grid md:grid-cols-2 gap-6">
                         {classes.map((cls) => (
-                            <div key={cls.id} className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition">
-                                <h3 className="text-xl font-semibold mb-2 text-gray-800">{cls.course}</h3>
-                                <p className="text-gray-600 mb-1">
-                                    <span className="font-semibold">Time:</span> {cls.time}
+                            <div key={cls.id} className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl shadow-xl hover:shadow-2xl transition border border-slate-700">
+                                <h3 className="text-xl font-semibold mb-2 text-cyan-400">{cls.course}</h3>
+                                <p className="text-slate-300 mb-1">
+                                    <span className="font-semibold text-slate-200">Time:</span> {cls.time}
                                 </p>
-                                <p className="text-gray-600 mb-3">
-                                    <span className="font-semibold">Students:</span> {cls.students}
+                                <p className="text-slate-300 mb-4">
+                                    <span className="font-semibold text-slate-200">Students:</span> {cls.students}
                                 </p>
                                 <div className="flex space-x-3">
                                     <button
@@ -219,18 +218,18 @@ export default function TeacherDashboard() {
                                             setSelectedClass(cls);
                                             setShowStudentsModal(true);
                                         }}
-                                        className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition flex items-center gap-2"
+                                        className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-4 py-2 rounded-lg hover:from-cyan-400 hover:to-blue-400 transition flex items-center gap-2 shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 font-semibold"
                                     >
-                                        <Eye size={16} /> View Students
+                                        <Eye size={16} /> View
                                     </button>
                                     <button
                                         onClick={() => {
                                             setEditingClass(cls);
                                             setShowEditModal(true);
                                         }}
-                                        className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition flex items-center gap-2"
+                                        className="bg-slate-700/70 text-slate-200 px-4 py-2 rounded-lg hover:bg-slate-600/70 transition flex items-center gap-2 border border-slate-600"
                                     >
-                                        <Edit size={16} /> Edit Class
+                                        <Edit size={16} /> Edit
                                     </button>
                                 </div>
                             </div>
@@ -238,33 +237,33 @@ export default function TeacherDashboard() {
                     </div>
 
                     {/* Weekly Schedule */}
-                    <section className="mt-10 bg-white p-6 rounded-xl shadow-md">
-                        <h3 className="text-xl font-semibold mb-4 text-gray-800">Weekly Schedule</h3>
+                    <section className="mt-10 bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl shadow-xl border border-slate-700">
+                        <h3 className="text-xl font-semibold mb-4 text-white">Weekly Schedule</h3>
                         <div className="overflow-x-auto">
                             <table className="min-w-full text-left border-collapse">
                                 <thead>
-                                    <tr>
-                                        <th className="px-4 py-2 border-b">Day</th>
-                                        <th className="px-4 py-2 border-b">Course</th>
-                                        <th className="px-4 py-2 border-b">Time</th>
-                                        <th className="px-4 py-2 border-b">Students</th>
-                                        <th className="px-4 py-2 border-b">Action</th>
+                                    <tr className="border-b border-slate-700">
+                                        <th className="px-4 py-3 text-slate-300 font-semibold">Day</th>
+                                        <th className="px-4 py-3 text-slate-300 font-semibold">Course</th>
+                                        <th className="px-4 py-3 text-slate-300 font-semibold">Time</th>
+                                        <th className="px-4 py-3 text-slate-300 font-semibold">Students</th>
+                                        <th className="px-4 py-3 text-slate-300 font-semibold">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {classes.map((cls) => (
-                                        <tr key={cls.id} className="hover:bg-indigo-50">
-                                            <td className="px-4 py-2 border-b">{cls.time.split(" ")[0]}</td>
-                                            <td className="px-4 py-2 border-b">{cls.course}</td>
-                                            <td className="px-4 py-2 border-b">{cls.time.split(" ").slice(1).join(" ")}</td>
-                                            <td className="px-4 py-2 border-b">{cls.students}</td>
-                                            <td className="px-4 py-2 border-b">
+                                        <tr key={cls.id} className="hover:bg-slate-700/30 transition border-b border-slate-700/50">
+                                            <td className="px-4 py-3 text-slate-200">{cls.time.split(" ")[0]}</td>
+                                            <td className="px-4 py-3 text-cyan-400 font-medium">{cls.course}</td>
+                                            <td className="px-4 py-3 text-slate-200">{cls.time.split(" ").slice(1).join(" ")}</td>
+                                            <td className="px-4 py-3 text-slate-200">{cls.students}</td>
+                                            <td className="px-4 py-3">
                                                 <button
                                                     onClick={() => {
                                                         setSelectedClass(cls);
                                                         setShowDeleteModal(true);
                                                     }}
-                                                    className="text-red-600 hover:text-red-800 transition"
+                                                    className="text-red-400 hover:text-red-300 transition"
                                                 >
                                                     <Trash2 size={18} />
                                                 </button>
@@ -280,18 +279,18 @@ export default function TeacherDashboard() {
 
             {/* Add Class Modal */}
             {showAddModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-xl p-8 max-w-md w-full mx-4 shadow-lg">
-                        <h3 className="text-2xl font-bold mb-6 text-gray-800">Add New Class</h3>
+                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 backdrop-blur-sm">
+                    <div className="bg-slate-800 border border-slate-700 rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl">
+                        <h3 className="text-2xl font-bold mb-6 text-white">Add New Class</h3>
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                <label className="block text-sm font-semibold text-slate-300 mb-2">
                                     Course Name
                                 </label>
                                 <input
                                     type="text"
                                     placeholder="e.g., Math 101"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                                    className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white placeholder-slate-400"
                                     value={newClass.course}
                                     onChange={(e) =>
                                         setNewClass({ ...newClass, course: e.target.value })
@@ -299,13 +298,13 @@ export default function TeacherDashboard() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                <label className="block text-sm font-semibold text-slate-300 mb-2">
                                     Schedule
                                 </label>
                                 <input
                                     type="text"
                                     placeholder="e.g., Mon 9:00 AM - 10:30 AM"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                                    className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white placeholder-slate-400"
                                     value={newClass.time}
                                     onChange={(e) =>
                                         setNewClass({ ...newClass, time: e.target.value })
@@ -313,13 +312,13 @@ export default function TeacherDashboard() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                <label className="block text-sm font-semibold text-slate-300 mb-2">
                                     Number of Students
                                 </label>
                                 <input
                                     type="number"
                                     placeholder="e.g., 25"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                                    className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white placeholder-slate-400"
                                     value={newClass.students}
                                     onChange={(e) =>
                                         setNewClass({ ...newClass, students: e.target.value })
@@ -330,13 +329,13 @@ export default function TeacherDashboard() {
                         <div className="flex gap-3 justify-end mt-8">
                             <button
                                 onClick={() => setShowAddModal(false)}
-                                className="px-6 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition font-semibold"
+                                className="px-6 py-2 text-slate-300 bg-slate-700/70 rounded-lg hover:bg-slate-600/70 transition font-semibold border border-slate-600"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleAddClass}
-                                className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-semibold"
+                                className="px-6 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-400 hover:to-blue-400 transition font-semibold shadow-lg shadow-cyan-500/30"
                             >
                                 Add Class
                             </button>
@@ -347,17 +346,17 @@ export default function TeacherDashboard() {
 
             {/* Edit Class Modal */}
             {showEditModal && editingClass && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-xl p-8 max-w-md w-full mx-4 shadow-lg">
-                        <h3 className="text-2xl font-bold mb-6 text-gray-800">Edit Class</h3>
+                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 backdrop-blur-sm">
+                    <div className="bg-slate-800 border border-slate-700 rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl">
+                        <h3 className="text-2xl font-bold mb-6 text-white">Edit Class</h3>
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                <label className="block text-sm font-semibold text-slate-300 mb-2">
                                     Course Name
                                 </label>
                                 <input
                                     type="text"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                                    className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white"
                                     value={editingClass.course}
                                     onChange={(e) =>
                                         setEditingClass({
@@ -368,12 +367,12 @@ export default function TeacherDashboard() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                <label className="block text-sm font-semibold text-slate-300 mb-2">
                                     Schedule
                                 </label>
                                 <input
                                     type="text"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                                    className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white"
                                     value={editingClass.time}
                                     onChange={(e) =>
                                         setEditingClass({
@@ -384,12 +383,12 @@ export default function TeacherDashboard() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                <label className="block text-sm font-semibold text-slate-300 mb-2">
                                     Number of Students
                                 </label>
                                 <input
                                     type="number"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                                    className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white"
                                     value={editingClass.students}
                                     onChange={(e) =>
                                         setEditingClass({
@@ -403,13 +402,13 @@ export default function TeacherDashboard() {
                         <div className="flex gap-3 justify-end mt-8">
                             <button
                                 onClick={() => setShowEditModal(false)}
-                                className="px-6 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition font-semibold"
+                                className="px-6 py-2 text-slate-300 bg-slate-700/70 rounded-lg hover:bg-slate-600/70 transition font-semibold border border-slate-600"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleEditClass}
-                                className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-semibold"
+                                className="px-6 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-400 hover:to-blue-400 transition font-semibold shadow-lg shadow-cyan-500/30"
                             >
                                 Save Changes
                             </button>
@@ -420,24 +419,24 @@ export default function TeacherDashboard() {
 
             {/* Delete Confirmation Modal */}
             {showDeleteModal && selectedClass && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-xl p-8 max-w-md w-full mx-4 shadow-lg">
-                        <h3 className="text-2xl font-bold mb-4 text-gray-800">Delete Class?</h3>
-                        <p className="text-gray-600 mb-8">
+                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 backdrop-blur-sm">
+                    <div className="bg-slate-800 border border-slate-700 rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl">
+                        <h3 className="text-2xl font-bold mb-4 text-white">Delete Class?</h3>
+                        <p className="text-slate-300 mb-8">
                             Are you sure you want to delete{" "}
-                            <span className="font-semibold">"{selectedClass.course}"</span>? This action
+                            <span className="font-semibold text-cyan-400">"{selectedClass.course}"</span>? This action
                             cannot be undone.
                         </p>
                         <div className="flex gap-3 justify-end">
                             <button
                                 onClick={() => setShowDeleteModal(false)}
-                                className="px-6 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition font-semibold"
+                                className="px-6 py-2 text-slate-300 bg-slate-700/70 rounded-lg hover:bg-slate-600/70 transition font-semibold border border-slate-600"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={() => handleDeleteClass(selectedClass.id)}
-                                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-semibold"
+                                className="px-6 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-400 hover:to-red-500 transition font-semibold shadow-lg shadow-red-500/30"
                             >
                                 Delete
                             </button>
@@ -448,39 +447,39 @@ export default function TeacherDashboard() {
 
             {/* View Students Modal */}
             {showStudentsModal && selectedClass && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-xl p-8 max-w-2xl w-full mx-4 shadow-lg max-h-96 overflow-y-auto">
-                        <h3 className="text-2xl font-bold mb-6 text-gray-800">
+                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 backdrop-blur-sm">
+                    <div className="bg-slate-800 border border-slate-700 rounded-xl p-8 max-w-2xl w-full mx-4 shadow-2xl max-h-96 overflow-y-auto">
+                        <h3 className="text-2xl font-bold mb-6 text-white">
                             Students in {selectedClass.course}
                         </h3>
 
                         {selectedClass.studentList.length === 0 ? (
-                            <p className="text-gray-500 text-center py-8">No students enrolled yet.</p>
+                            <p className="text-slate-400 text-center py-8">No students enrolled yet.</p>
                         ) : (
                             <div className="overflow-x-auto">
                                 <table className="min-w-full text-left border-collapse">
                                     <thead>
-                                        <tr>
-                                            <th className="px-4 py-2 border-b font-semibold">Name</th>
-                                            <th className="px-4 py-2 border-b font-semibold">Email</th>
-                                            <th className="px-4 py-2 border-b font-semibold">Grade</th>
-                                            <th className="px-4 py-2 border-b font-semibold">Action</th>
+                                        <tr className="border-b border-slate-700">
+                                            <th className="px-4 py-3 text-slate-300 font-semibold">Name</th>
+                                            <th className="px-4 py-3 text-slate-300 font-semibold">Email</th>
+                                            <th className="px-4 py-3 text-slate-300 font-semibold">Grade</th>
+                                            <th className="px-4 py-3 text-slate-300 font-semibold">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {selectedClass.studentList.map((student) => (
-                                            <tr key={student.id} className="hover:bg-indigo-50">
-                                                <td className="px-4 py-2 border-b">{student.name}</td>
-                                                <td className="px-4 py-2 border-b">{student.email}</td>
-                                                <td className="px-4 py-2 border-b">
-                                                    <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-lg font-semibold">
+                                            <tr key={student.id} className="hover:bg-slate-700/30 transition border-b border-slate-700/50">
+                                                <td className="px-4 py-3 text-slate-200">{student.name}</td>
+                                                <td className="px-4 py-3 text-slate-200">{student.email}</td>
+                                                <td className="px-4 py-3">
+                                                    <span className="bg-cyan-500/20 text-cyan-300 px-3 py-1 rounded-lg font-semibold border border-cyan-500/30">
                                                         {student.grade}
                                                     </span>
                                                 </td>
-                                                <td className="px-4 py-2 border-b">
+                                                <td className="px-4 py-3">
                                                     <button
                                                         onClick={() => handleRemoveStudent(selectedClass.id, student.id)}
-                                                        className="text-red-600 hover:text-red-800 transition"
+                                                        className="text-red-400 hover:text-red-300 transition"
                                                     >
                                                         <Trash2 size={16} />
                                                     </button>
@@ -498,13 +497,13 @@ export default function TeacherDashboard() {
                                     setShowAddStudentModal(true);
                                     setSelectedStudentIds([]);
                                 }}
-                                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold flex items-center gap-2"
+                                className="px-6 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-400 hover:to-emerald-400 transition font-semibold flex items-center gap-2 shadow-lg shadow-green-500/30"
                             >
                                 <Plus size={18} /> Add Students
                             </button>
                             <button
                                 onClick={() => setShowStudentsModal(false)}
-                                className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-semibold"
+                                className="px-6 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-400 hover:to-blue-400 transition font-semibold shadow-lg shadow-cyan-500/30"
                             >
                                 Close
                             </button>
@@ -515,24 +514,24 @@ export default function TeacherDashboard() {
 
             {/* Add Students to Class Modal */}
             {showAddStudentModal && selectedClass && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-xl p-8 max-w-2xl w-full mx-4 shadow-lg max-h-96 overflow-y-auto">
-                        <h3 className="text-2xl font-bold mb-6 text-gray-800">
+                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 backdrop-blur-sm">
+                    <div className="bg-slate-800 border border-slate-700 rounded-xl p-8 max-w-2xl w-full mx-4 shadow-2xl max-h-96 overflow-y-auto">
+                        <h3 className="text-2xl font-bold mb-6 text-white">
                             Add Students to {selectedClass.course}
                         </h3>
 
-                        <div className="mb-4 text-sm text-gray-600">
+                        <div className="mb-4 text-sm text-slate-300">
                             Select students from the database to add to this class:
                         </div>
 
                         <div className="overflow-x-auto mb-6">
                             <table className="min-w-full text-left border-collapse">
                                 <thead>
-                                    <tr>
-                                        <th className="px-4 py-2 border-b font-semibold">Select</th>
-                                        <th className="px-4 py-2 border-b font-semibold">Name</th>
-                                        <th className="px-4 py-2 border-b font-semibold">Email</th>
-                                        <th className="px-4 py-2 border-b font-semibold">Grade</th>
+                                    <tr className="border-b border-slate-700">
+                                        <th className="px-4 py-3 text-slate-300 font-semibold">Select</th>
+                                        <th className="px-4 py-3 text-slate-300 font-semibold">Name</th>
+                                        <th className="px-4 py-3 text-slate-300 font-semibold">Email</th>
+                                        <th className="px-4 py-3 text-slate-300 font-semibold">Grade</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -543,24 +542,24 @@ export default function TeacherDashboard() {
                                         return (
                                             <tr
                                                 key={student.id}
-                                                className={`hover:bg-indigo-50 ${isEnrolled ? 'opacity-50' : ''}`}
+                                                className={`hover:bg-slate-700/30 transition border-b border-slate-700/50 ${isEnrolled ? 'opacity-50' : ''}`}
                                             >
-                                                <td className="px-4 py-2 border-b">
+                                                <td className="px-4 py-3">
                                                     <input
                                                         type="checkbox"
                                                         checked={isSelected}
                                                         disabled={isEnrolled}
                                                         onChange={() => toggleStudentSelection(student.id)}
-                                                        className="w-4 h-4 text-indigo-600 cursor-pointer"
+                                                        className="w-4 h-4 text-cyan-500 cursor-pointer bg-slate-700 border-slate-600 rounded focus:ring-cyan-500"
                                                     />
                                                 </td>
-                                                <td className="px-4 py-2 border-b">
+                                                <td className="px-4 py-3 text-slate-200">
                                                     {student.name}
-                                                    {isEnrolled && <span className="ml-2 text-xs text-gray-500">(Already enrolled)</span>}
+                                                    {isEnrolled && <span className="ml-2 text-xs text-slate-500">(Already enrolled)</span>}
                                                 </td>
-                                                <td className="px-4 py-2 border-b">{student.email}</td>
-                                                <td className="px-4 py-2 border-b">
-                                                    <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-lg font-semibold">
+                                                <td className="px-4 py-3 text-slate-200">{student.email}</td>
+                                                <td className="px-4 py-3">
+                                                    <span className="bg-cyan-500/20 text-cyan-300 px-3 py-1 rounded-lg font-semibold border border-cyan-500/30">
                                                         {student.grade}
                                                     </span>
                                                 </td>
@@ -577,14 +576,14 @@ export default function TeacherDashboard() {
                                     setShowAddStudentModal(false);
                                     setSelectedStudentIds([]);
                                 }}
-                                className="px-6 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition font-semibold"
+                                className="px-6 py-2 text-slate-300 bg-slate-700/70 rounded-lg hover:bg-slate-600/70 transition font-semibold border border-slate-600"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleAddStudentsToClass}
                                 disabled={selectedStudentIds.length === 0}
-                                className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                className="px-6 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-400 hover:to-blue-400 transition font-semibold disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed shadow-lg shadow-cyan-500/30"
                             >
                                 Add {selectedStudentIds.length} Student{selectedStudentIds.length !== 1 ? 's' : ''}
                             </button>

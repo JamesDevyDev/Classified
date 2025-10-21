@@ -38,31 +38,33 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col md:flex-row">
-            {/* Left Side - Illustration */}
-            <div className="hidden md:flex md:w-1/2 bg-indigo-50 justify-center items-center">
-                <Image
-                    src="/assets/bg1.png"
-                    alt="Login Illustration"
-                    width={500}
-                    height={500}
-                />
+        <div className="min-h-screen flex justify-center items-center p-4 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 relative overflow-hidden">
+            {/* Animated background elements */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-20 left-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse"></div>
+                <div className="absolute bottom-20 right-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
             </div>
 
-            {/* Right Side - Form */}
-            <div className="flex flex-1 justify-center items-center p-8 md:p-16 bg-white">
-                <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-lg">
-                    <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+            <div className="w-full max-w-md relative z-10">
+                {/* Logo/Brand */}
+                <div className="text-center mb-8">
+                    <h1 className="text-4xl font-bold text-cyan-400 mb-2">Classified</h1>
+                    <p className="text-slate-400">Class Scheduling System</p>
+                </div>
+
+                {/* Login Card */}
+                <div className="bg-slate-800/50 backdrop-blur-xl p-8 rounded-2xl shadow-2xl border border-slate-700/50">
+                    <h2 className="text-2xl font-bold text-white mb-2 text-center">
                         Welcome Back
                     </h2>
-                    <p className="text-gray-600 mb-8 text-center">
-                        Log in to access your class schedule and manage your courses.
+                    <p className="text-slate-400 mb-8 text-center text-sm">
+                        Log in to access your class schedule and manage your courses
                     </p>
 
-                    <form className="space-y-6" onSubmit={handleSubmit}>
+                    <form className="space-y-5" onSubmit={handleSubmit}>
                         <div>
                             <label
-                                className="block text-gray-700 mb-2"
+                                className="block text-slate-300 font-medium mb-2 text-sm"
                                 htmlFor="username"
                             >
                                 Username
@@ -73,7 +75,7 @@ export default function LoginPage() {
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 placeholder="Enter your username"
-                                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black"
+                                className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-white placeholder-slate-500 transition"
                                 required
                                 autoComplete="username"
                             />
@@ -81,7 +83,7 @@ export default function LoginPage() {
 
                         <div>
                             <label
-                                className="block text-gray-700 mb-2"
+                                className="block text-slate-300 font-medium mb-2 text-sm"
                                 htmlFor="password"
                             >
                                 Password
@@ -92,33 +94,39 @@ export default function LoginPage() {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="Enter your password"
-                                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black"
+                                className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-white placeholder-slate-500 transition"
                                 required
                                 autoComplete="current-password"
                             />
                         </div>
 
                         {error && (
-                            <p className="text-red-500 text-sm text-center">{error}</p>
+                            <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg text-sm text-center">
+                                {error}
+                            </div>
                         )}
 
-                        <div className="flex justify-between items-center text-sm text-gray-500">
-                            <label>
-                                <input type="checkbox" className="mr-2" />
+                        <div className="flex justify-between items-center text-sm">
+                            <label className="flex items-center cursor-pointer text-slate-400 hover:text-slate-300 transition">
+                                <input type="checkbox" className="mr-2 w-4 h-4 rounded bg-slate-900/50 border-slate-600 text-cyan-500 focus:ring-cyan-500 focus:ring-offset-slate-800" />
                                 Remember me
                             </label>
-                            <a href="#" className="text-indigo-600 hover:underline">
+                            <a href="#" className="text-cyan-400 hover:text-cyan-300 transition">
                                 Forgot password?
                             </a>
                         </div>
 
                         <button
                             type="submit"
-                            className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition"
+                            className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white py-3 rounded-lg font-semibold hover:from-cyan-400 hover:to-blue-400 transition shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50"
                         >
                             Log In
                         </button>
                     </form>
+
+                    <div className="mt-6 text-center text-sm text-slate-400">
+                        Don't have an account? <a href="#" className="text-cyan-400 hover:text-cyan-300 transition">Sign up</a>
+                    </div>
                 </div>
             </div>
         </div>

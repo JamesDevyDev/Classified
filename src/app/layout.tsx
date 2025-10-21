@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Footer from "./Footer";
 
 export const metadata: Metadata = {
   title: "Classified",
@@ -15,7 +16,10 @@ export default function RootLayout({
     <html lang="en" data-theme="light">
 
       <body>
-        {children}
+        <div>
+          {children}
+        </div>
+        <Footer />
       </body>
     </html>
   );

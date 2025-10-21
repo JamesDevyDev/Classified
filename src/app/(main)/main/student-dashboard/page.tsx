@@ -18,17 +18,19 @@ export default function Dashboard() {
     ];
 
     return (
-        <div className="min-h-screen bg-gray-100 flex flex-col">
-            
+        <div className="min-h-screen bg-slate-900 flex flex-col">
 
             {/* Main Content */}
             <div className="flex flex-col md:flex-row flex-1 p-6 md:p-10 gap-6">
                 {/* Left Sidebar */}
-                <aside className="md:w-1/4 bg-white p-6 rounded-xl shadow-md">
-                    <h2 className="text-xl font-semibold mb-4">Enrolled Courses</h2>
-                    <ul className="space-y-2 text-gray-700">
+                <aside className="md:w-1/4 bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl shadow-xl border border-slate-700">
+                    <h2 className="text-xl font-semibold mb-4 text-white">Enrolled Courses</h2>
+                    <ul className="space-y-2">
                         {enrolledCourses.map((course, idx) => (
-                            <li key={idx} className="px-3 py-2 bg-indigo-50 rounded-lg hover:bg-indigo-100 cursor-pointer">
+                            <li
+                                key={idx}
+                                className="px-3 py-2 bg-slate-700/50 text-slate-200 rounded-lg hover:bg-cyan-500/20 hover:text-cyan-300 cursor-pointer transition border border-slate-600/50"
+                            >
                                 {course}
                             </li>
                         ))}
@@ -37,14 +39,21 @@ export default function Dashboard() {
 
                 {/* Right Main Section */}
                 <main className="flex-1">
-                    <h2 className="text-2xl font-bold mb-6 text-gray-800">Upcoming Classes</h2>
+                    <h2 className="text-2xl font-bold mb-6 text-white">Upcoming Classes</h2>
                     <div className="grid md:grid-cols-2 gap-6">
                         {upcomingClasses.map((cls) => (
-                            <div key={cls.id} className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition">
-                                <h3 className="text-xl font-semibold mb-2 text-gray-800">{cls.course}</h3>
-                                <p className="text-gray-600 mb-1"><span className="font-semibold">Time:</span> {cls.time}</p>
-                                <p className="text-gray-600 mb-3"><span className="font-semibold">Teacher:</span> {cls.teacher}</p>
-                                <button className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
+                            <div
+                                key={cls.id}
+                                className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl shadow-xl hover:shadow-2xl transition border border-slate-700"
+                            >
+                                <h3 className="text-xl font-semibold mb-2 text-cyan-400">{cls.course}</h3>
+                                <p className="text-slate-300 mb-1">
+                                    <span className="font-semibold text-slate-200">Time:</span> {cls.time}
+                                </p>
+                                <p className="text-slate-300 mb-4">
+                                    <span className="font-semibold text-slate-200">Teacher:</span> {cls.teacher}
+                                </p>
+                                <button className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-4 py-2 rounded-lg hover:from-cyan-400 hover:to-blue-400 transition shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 font-semibold">
                                     Join Class
                                 </button>
                             </div>
@@ -52,25 +61,25 @@ export default function Dashboard() {
                     </div>
 
                     {/* Schedule Overview */}
-                    <section className="mt-10 bg-white p-6 rounded-xl shadow-md">
-                        <h3 className="text-xl font-semibold mb-4 text-gray-800">Weekly Schedule</h3>
+                    <section className="mt-10 bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl shadow-xl border border-slate-700">
+                        <h3 className="text-xl font-semibold mb-4 text-white">Weekly Schedule</h3>
                         <div className="overflow-x-auto">
                             <table className="min-w-full text-left border-collapse">
                                 <thead>
-                                    <tr>
-                                        <th className="px-4 py-2 border-b">Day</th>
-                                        <th className="px-4 py-2 border-b">Course</th>
-                                        <th className="px-4 py-2 border-b">Time</th>
-                                        <th className="px-4 py-2 border-b">Teacher</th>
+                                    <tr className="border-b border-slate-700">
+                                        <th className="px-4 py-3 text-slate-300 font-semibold">Day</th>
+                                        <th className="px-4 py-3 text-slate-300 font-semibold">Course</th>
+                                        <th className="px-4 py-3 text-slate-300 font-semibold">Time</th>
+                                        <th className="px-4 py-3 text-slate-300 font-semibold">Teacher</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {upcomingClasses.map((cls) => (
-                                        <tr key={cls.id} className="hover:bg-indigo-50">
-                                            <td className="px-4 py-2 border-b">{cls.time.split(" ")[0]}</td>
-                                            <td className="px-4 py-2 border-b">{cls.course}</td>
-                                            <td className="px-4 py-2 border-b">{cls.time.split(" ").slice(1).join(" ")}</td>
-                                            <td className="px-4 py-2 border-b">{cls.teacher}</td>
+                                        <tr key={cls.id} className="hover:bg-slate-700/30 transition border-b border-slate-700/50">
+                                            <td className="px-4 py-3 text-slate-200">{cls.time.split(" ")[0]}</td>
+                                            <td className="px-4 py-3 text-cyan-400 font-medium">{cls.course}</td>
+                                            <td className="px-4 py-3 text-slate-200">{cls.time.split(" ").slice(1).join(" ")}</td>
+                                            <td className="px-4 py-3 text-slate-200">{cls.teacher}</td>
                                         </tr>
                                     ))}
                                 </tbody>
