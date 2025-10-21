@@ -21,6 +21,7 @@ const Main = () => {
     useEffect(() => {
         const upTime = async () => {
             const user = await getLoggedInUser()
+            console.log(user)
 
             { user?.role === 'admin' && router.push("/main/admin-dashboard") }
             { user?.role === 'student' && router.push("/main/student-dashboard") }
