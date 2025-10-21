@@ -1,9 +1,18 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+
+import useAuthStore from '@/zustand/useAuthStore'
+import useAdminStore from '@/zustand/useAdminStore'
 
 const TeacherModal = () => {
+    const { getLoggedInUser, authUser } = useAuthStore()
+    const { createTeacher } = useAdminStore()
+
+    useEffect(() => {
+        getLoggedInUser()
+    }, [])
+
     const [teacherName, setTeacherName] = useState('')
-    const [department, setDepartment] = useState('')
     const [password, setPassword] = useState('')
 
     const openModal = () => {
@@ -18,12 +27,10 @@ const TeacherModal = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        const teacherData = { teacherName, department, password }
-        console.log('Teacher Info:', teacherData)
+        createTeacher(teacherName, password, authUser?._id)
 
         // Reset fields and close modal
         setTeacherName('')
-        setDepartment('')
         setPassword('')
         closeModal()
     }
@@ -55,27 +62,6 @@ const TeacherModal = () => {
                                 onChange={(e) => setTeacherName(e.target.value)}
                                 required
                             />
-                        </div>
-
-                        {/* Department Dropdown */}
-                        <div>
-                            <label className="block text-gray-700 mb-1">Department</label>
-                            <select
-                                className="select select-bordered w-full"
-                                value={department}
-                                onChange={(e) => setDepartment(e.target.value)}
-                                required
-                            >
-                                <option value="" disabled>Select department</option>
-                                <option>Mathematics</option>
-                                <option>Science</option>
-                                <option>English</option>
-                                <option>Information Technology</option>
-                                <option>Engineering</option>
-                                <option>Business Administration</option>
-                                <option>Humanities</option>
-                                <option>Education</option>
-                            </select>
                         </div>
 
                         {/* Password */}

@@ -1,19 +1,23 @@
 'use client'
 
+import useAdminStore from "@/zustand/useAdminStore";
+import useAuthStore from '@/zustand/useAuthStore'
+
 import StudentModal from "@/component/admin-dashboard/studentModal";
 import TeacherModal from "@/component/admin-dashboard/teacherModal";
-import React, { useState } from "react";
+
+import React, { useEffect, useState } from "react";
 
 export default function AdminDashboard() {
-    const [students, setStudents] = useState([
-        { id: 1, name: "John Doe", studentId: "S-001" },
-        { id: 2, name: "Mark Lee", studentId: "S-002" },
-    ]);
+    const { getLoggedInUser, authUser } = useAuthStore()
+    const { deleteStudent, deleteTeacher, getStudent, getTeacher, students, teachers } = useAdminStore()
 
-    const [teachers, setTeachers] = useState([
-        { id: 1, name: "Jane Smith", department: "Mathematics" },
-        { id: 2, name: "Alex Johnson", department: "Science" },
-    ]);
+    useEffect(() => {
+        getLoggedInUser()
+        getTeacher()
+        getStudent()
+    }, [])
+
 
     const [editingStudent, setEditingStudent] = useState<{ id: number; name: string; studentId: string } | null>(null);
     const [editingTeacher, setEditingTeacher] = useState<{ id: number; name: string; department: string } | null>(null);
@@ -32,6 +36,8 @@ export default function AdminDashboard() {
         e.preventDefault();
         console.log("Updated Student:", editingStudent);
         (document.getElementById("edit_student_modal") as HTMLDialogElement).close();
+
+        console.log('nag save na ng student')
     };
 
     const handleSaveTeacher = (e: React.FormEvent) => {
@@ -77,8 +83,8 @@ export default function AdminDashboard() {
                             </thead>
                             <tbody>
                                 {students.map((student) => (
-                                    <tr key={student.id} className="hover:bg-indigo-50">
-                                        <td className="px-4 py-2 border-b">{student.name}</td>
+                                    <tr key={student._id} className="hover:bg-indigo-50">
+                                        <td className="px-4 py-2 border-b">{student.studentName}</td>
                                         <td className="px-4 py-2 border-b">{student.studentId}</td>
                                         <td className="px-4 py-2 border-b flex flex-col md:flex-row gap-2">
                                             <button
@@ -87,13 +93,16 @@ export default function AdminDashboard() {
                                             >
                                                 Edit
                                             </button>
-                                            <button className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
+                                            <button className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600" onClick={() => {
+                                                deleteStudent(student?._id, authUser?._id)
+                                            }}>
                                                 Delete
                                             </button>
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
+
                         </table>
                     </div>
                 </section>
@@ -107,14 +116,14 @@ export default function AdminDashboard() {
                             <thead>
                                 <tr>
                                     <th className="px-4 py-2 border-b">Teacher Name</th>
-                                    <th className="px-4 py-2 border-b">Department</th>
+                                    <th className="px-4 py-2 border-b">Date Created</th>
                                     <th className="px-4 py-2 border-b">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {teachers.map((teacher) => (
-                                    <tr key={teacher.id} className="hover:bg-indigo-50">
-                                        <td className="px-4 py-2 border-b">{teacher.name}</td>
+                                    <tr key={teacher._id} className="hover:bg-indigo-50">
+                                        <td className="px-4 py-2 border-b">{teacher.teacherName}</td>
                                         <td className="px-4 py-2 border-b">{teacher.department}</td>
                                         <td className="px-4 py-2 border-b flex flex-col md:flex-row gap-2">
                                             <button
@@ -123,13 +132,16 @@ export default function AdminDashboard() {
                                             >
                                                 Edit
                                             </button>
-                                            <button className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
+                                            <button className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600" onClick={() => {
+                                                deleteTeacher(teacher?._id, authUser?._id)
+                                            }}>
                                                 Delete
                                             </button>
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
+
                         </table>
                     </div>
                 </section>

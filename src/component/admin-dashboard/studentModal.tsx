@@ -1,7 +1,18 @@
 'use client'
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+
+import useAuthStore from '@/zustand/useAuthStore'
+import useAdminStore from '@/zustand/useAdminStore'
 
 const StudentModal: React.FC = () => {
+
+    const { getLoggedInUser, authUser } = useAuthStore()
+    const { createStudent } = useAdminStore()
+
+    useEffect(() => {
+        getLoggedInUser()
+    }, [])
+
     const modalRef = useRef<HTMLDialogElement>(null)
     const [studentName, setStudentName] = useState('')
     const [studentId, setStudentId] = useState('')
@@ -12,8 +23,7 @@ const StudentModal: React.FC = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        const studentData = { studentName, studentId, password }
-        console.log('Student Info:', studentData)
+        createStudent(studentName, password, authUser?._id)
 
         // Reset and close modal
         setStudentName('')
@@ -44,19 +54,6 @@ const StudentModal: React.FC = () => {
                                 className="input input-bordered w-full"
                                 value={studentName}
                                 onChange={(e) => setStudentName(e.target.value)}
-                                required
-                            />
-                        </div>
-
-                        {/* Student ID */}
-                        <div>
-                            <label className="block text-gray-700 mb-1">Student ID</label>
-                            <input
-                                type="text"
-                                placeholder="Enter student ID"
-                                className="input input-bordered w-full"
-                                value={studentId}
-                                onChange={(e) => setStudentId(e.target.value)}
                                 required
                             />
                         </div>
