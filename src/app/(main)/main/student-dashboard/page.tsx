@@ -19,17 +19,7 @@ export default function Dashboard() {
 
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col">
-            {/* Navbar */}
-            <nav className="flex justify-between items-center p-6 bg-white shadow-md">
-                <h1 className="text-2xl font-bold text-indigo-600">Classified <span className='text-black'>Student</span></h1>
-                <div className="space-x-6">
-                    <Link href="/student-dashboard" className="text-gray-700 hover:text-indigo-600">Dashboard</Link>
-                    <Link href="/profile" className="text-gray-700 hover:text-indigo-600">Profile</Link>
-                    <button className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
-                        Logout
-                    </button>
-                </div>
-            </nav>
+            
 
             {/* Main Content */}
             <div className="flex flex-col md:flex-row flex-1 p-6 md:p-10 gap-6">

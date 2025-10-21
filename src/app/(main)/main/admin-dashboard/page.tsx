@@ -48,23 +48,7 @@ export default function AdminDashboard() {
 
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col overflow-x-hidden">
-            {/* Navbar */}
-            <nav className="flex flex-col md:flex-row justify-between items-center p-4 md:p-6 bg-white shadow-md gap-4">
-                <h1 className="text-2xl font-bold text-indigo-600">
-                    Classified <span className="text-black">Admin</span>
-                </h1>
-                <div className="flex flex-col md:flex-row gap-3 md:gap-6">
-                    <a href="/admin-dashboard" className="text-gray-700 hover:text-indigo-600">
-                        Dashboard
-                    </a>
-                    <a href="/profile" className="text-gray-700 hover:text-indigo-600">
-                        Profile
-                    </a>
-                    <button className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
-                        Logout
-                    </button>
-                </div>
-            </nav>
+            
 
             {/* Main Content */}
             <div className="flex-1 p-4 md:p-10 space-y-8">

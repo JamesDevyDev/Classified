@@ -1,3 +1,4 @@
+import Navbar from "./Navbar";
 
 export default function mainLayout({
     children,
@@ -6,6 +7,9 @@ export default function mainLayout({
 }>) {
     return (
         <div className=''>
+            <div>
+                <Navbar />
+            </div>
             {children}
         </div>
     );
