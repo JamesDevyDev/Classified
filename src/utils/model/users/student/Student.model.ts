@@ -23,7 +23,6 @@ const studentSchema = new mongoose.Schema({
     }
 })
 
-// ✅ Pre-save middleware to auto-generate studentId like "2025-10-001"
 studentSchema.pre("save", async function (next) {
     if (this.studentId) return next() 
 
