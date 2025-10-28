@@ -219,55 +219,65 @@ export default function StudentDashboard() {
                                 </div>
 
                                 {/* Time Slots */}
-                                <div className="divide-y divide-slate-700/50">
+                                <div className="relative">
                                     {timeSlots.map((time) => (
-                                        <div key={time} className="grid grid-cols-6 min-h-[80px]">
+                                        <div key={time} className="grid grid-cols-6 h-[80px] border-b border-slate-700/50">
                                             <div className="px-4 py-3 border-r border-slate-700/50 bg-slate-800/30 flex items-start">
                                                 <span className="text-xs font-medium text-slate-400">{formatTime(time)}</span>
                                             </div>
-                                            {daysOfWeek.map((day) => {
-                                                const dayClasses = getClassesForDay(day).filter(cls => {
-                                                    const classStartHour = parseInt(cls.startTime.split(':')[0]);
-                                                    const slotHour = parseInt(time.split(':')[0]);
-                                                    return classStartHour === slotHour;
-                                                });
-
-                                                return (
-                                                    <div key={`${day}-${time}`} className="px-2 py-2 border-r border-slate-700/50 last:border-r-0">
-                                                        {dayClasses.map((cls) => {
-                                                            const startHour = parseInt(cls.startTime.split(':')[0]);
-                                                            const endHour = parseInt(cls.endTime.split(':')[0]);
-                                                            const startMin = parseInt(cls.startTime.split(':')[1]);
-                                                            const endMin = parseInt(cls.endTime.split(':')[1]);
-                                                            const duration = (endHour - startHour) + (endMin - startMin) / 60;
-                                                            const height = Math.max(duration * 60, 60);
-
-                                                            return (
-                                                                <div
-                                                                    key={cls.id}
-                                                                    onClick={() => setSelectedClass(cls)}
-                                                                    className={`${getColorClasses(cls.color, 'bg')} ${getColorClasses(cls.color, 'hover')} rounded-lg p-2 cursor-pointer transition shadow-lg mb-2 overflow-hidden`}
-                                                                    style={{ minHeight: `${height}px` }}
-                                                                >
-                                                                    <div className="text-white font-semibold text-sm mb-1 truncate">
-                                                                        {cls.course}
-                                                                    </div>
-                                                                    <div className="text-white/90 text-xs flex items-center gap-1 mb-1">
-                                                                        <Clock size={10} />
-                                                                        {formatTime(cls.startTime)} - {formatTime(cls.endTime)}
-                                                                    </div>
-                                                                    <div className="text-white/80 text-xs flex items-center gap-1">
-                                                                        <User size={10} />
-                                                                        {cls.teacher}
-                                                                    </div>
-                                                                </div>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                );
-                                            })}
+                                            {daysOfWeek.map((day) => (
+                                                <div key={`${day}-${time}`} className="px-2 py-2 border-r border-slate-700/50 last:border-r-0 relative">
+                                                </div>
+                                            ))}
                                         </div>
                                     ))}
+                                    
+                                    {/* Absolute positioned classes that span multiple slots */}
+                                    {daysOfWeek.map((day, dayIndex) => {
+                                        const dayClasses = getClassesForDay(day);
+                                        return dayClasses.map((cls) => {
+                                            const startHour = parseInt(cls.startTime.split(':')[0]);
+                                            const endHour = parseInt(cls.endTime.split(':')[0]);
+                                            const startMin = parseInt(cls.startTime.split(':')[1]);
+                                            const endMin = parseInt(cls.endTime.split(':')[1]);
+                                            
+                                            const startSlotIndex = startHour - 8;
+                                            const startOffset = (startMin / 60) * 80;
+                                            const duration = (endHour - startHour) + (endMin - startMin) / 60;
+                                            const height = duration * 80;
+                                            
+                                            const leftPosition = ((dayIndex + 1) / 6) * 100;
+                                            const width = (1 / 6) * 100;
+
+                                            return (
+                                                <div
+                                                    key={cls.id}
+                                                    onClick={() => setSelectedClass(cls)}
+                                                    className={`absolute ${getColorClasses(cls.color, 'bg')} ${getColorClasses(cls.color, 'hover')} rounded-lg p-2 cursor-pointer transition shadow-lg overflow-hidden`}
+                                                    style={{
+                                                        top: `${startSlotIndex * 80 + startOffset}px`,
+                                                        left: `${leftPosition}%`,
+                                                        width: `calc(${width}% - 16px)`,
+                                                        height: `${height}px`,
+                                                        marginLeft: '8px',
+                                                        marginRight: '8px',
+                                                    }}
+                                                >
+                                                    <div className="text-white font-semibold text-sm mb-1 truncate">
+                                                        {cls.course}
+                                                    </div>
+                                                    <div className="text-white/90 text-xs flex items-center gap-1 mb-1">
+                                                        <Clock size={10} />
+                                                        {formatTime(cls.startTime)} - {formatTime(cls.endTime)}
+                                                    </div>
+                                                    <div className="text-white/80 text-xs flex items-center gap-1">
+                                                        <User size={10} />
+                                                        {cls.teacher}
+                                                    </div>
+                                                </div>
+                                            );
+                                        });
+                                    })}
                                 </div>
                             </div>
                         </div>
