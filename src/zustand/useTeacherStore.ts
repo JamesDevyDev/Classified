@@ -5,12 +5,13 @@ interface TeacherStore {
     createClass: (teacherId: number, course: string, dayOfWeek: string, startTime: string, endTime: string, students: number, color: string, studentList: string[]) => Promise<any>
     deleteClass: (id: number) => Promise<any>
     editClass: (id: number, course?: string, dayOfWeek?: string, startTime?: string, endTime?: string, color?: string) => Promise<any>
+    getAllStudents: () => Promise<any>
 }
 
 const useTeacherStore = create<TeacherStore>((set, get) => ({
     getClass: async () => {
         try {
-            const res = await fetch("/api/teacher/getClass");
+            const res = await fetch("/api/teacher/class/getClass");
             const data = await res.json();
             return data
         } catch (error) {
@@ -19,7 +20,7 @@ const useTeacherStore = create<TeacherStore>((set, get) => ({
     },
     createClass: async (teacherId: number, course: string, dayOfWeek: string, startTime: string, endTime: string, students: number, color: string, studentList: string[]) => {
         try {
-            let res = await fetch("/api/teacher/createClass", {
+            let res = await fetch("/api/teacher/class/createClass", {
                 method: 'POST',
                 headers: {
                     'content-type': 'application/json'
@@ -35,7 +36,7 @@ const useTeacherStore = create<TeacherStore>((set, get) => ({
     },
     deleteClass: async (id: number) => {
         try {
-            let res = await fetch("/api/teacher/deleteClass", {
+            let res = await fetch("/api/teacher/class/deleteClass", {
                 method: 'DELETE',
                 headers: {
                     'content-type': 'application/json'
@@ -59,8 +60,8 @@ const useTeacherStore = create<TeacherStore>((set, get) => ({
             if (endTime !== undefined) updatePayload.endTime = endTime;
             if (color !== undefined) updatePayload.color = color;
 
-            let res = await fetch("/api/teacher/editClass", {
-                method: 'PATCH', 
+            let res = await fetch("/api/teacher/class/editClass", {
+                method: 'PATCH',
                 headers: {
                     'content-type': 'application/json'
                 },
@@ -78,6 +79,23 @@ const useTeacherStore = create<TeacherStore>((set, get) => ({
         } catch (error) {
             console.log(error)
             throw error;
+        }
+    },
+
+    getAllStudents: async () => {
+        try {
+            let res = await fetch("/api/teacher/students/getAllStudents", {
+                method: 'GET',
+                headers: {
+                    'content-type': 'application/json'
+                }
+            })
+            if (!res.ok) return console.error("Error with the fetch")
+
+            const data = await res.json()
+            return data
+        } catch (error) {
+            console.log(error)
         }
     }
 }))

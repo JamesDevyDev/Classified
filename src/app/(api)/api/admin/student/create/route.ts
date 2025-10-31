@@ -7,7 +7,7 @@ import bcrypt from "bcrypt"
 export const POST = async (req: Request) => {
     try {
         const body = await req.json()
-        const { studentName, password, authUserId } = body
+        const { studentName, password  } = body
 
         await connectDb()
 
@@ -21,11 +21,7 @@ export const POST = async (req: Request) => {
             return NextResponse.json("Error. You need to be ADMIN to do this.", { status: 400 })
         }
 
-        // ✅ Fix: Access _id from authenticatedUser.user
-        if (authenticatedUser?.user?._id.toString() !== authUserId) {
-            return NextResponse.json("You are not allowed to do this. This is not your account.", { status: 403 });
-        }
-
+     
         const ifExist = await Student.findOne({ studentName })
         if (ifExist) {
             return NextResponse.json("Student Name already exists.", { status: 400 })

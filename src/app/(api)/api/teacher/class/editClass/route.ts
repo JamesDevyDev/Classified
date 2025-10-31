@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import Class from "@/utils/model/class/teacher/Class.Model";
+import connectDb from "@/utils/connectDb";
 
 // Validate 24-hour time format (HH:MM)
 function isValid24HourTime(time: string): boolean {
@@ -34,6 +35,8 @@ function convertTo24Hour(time: string): string | null {
 
 export const PATCH = async (req: Request) => {
     try {
+        await connectDb()
+
         const body = await req.json();
         const { id, course, dayOfWeek, startTime, endTime, color } = body;
 

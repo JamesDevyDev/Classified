@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from "react";
-import { Trash2, Edit, Plus, Eye, Calendar, Clock, Users, ChevronLeft, ChevronRight } from "lucide-react";
+import { Trash2, Edit, Plus, Eye, Calendar, Clock, Users, X} from "lucide-react";
 import useTeacherStore from "@/zustand/useTeacherStore";
 import useAuthStore from "@/zustand/useAuthStore";
 
@@ -17,10 +17,10 @@ interface Class {
 }
 
 interface Student {
-    id: number;
-    name: string;
-    email: string;
-    grade: string;
+    _id: string;
+    studentName: string;
+    studentId: string;
+    role: string;
 }
 
 interface NewClassInput {
@@ -34,7 +34,7 @@ interface NewClassInput {
 export default function TeacherDashboard() {
 
     const { getLoggedInUser, authUser } = useAuthStore()
-    const { getClass, createClass, deleteClass, editClass } = useTeacherStore()
+    const { getClass, createClass, deleteClass, editClass, getAllStudents } = useTeacherStore()
     const [isLoading, setIsLoading] = useState(true)
 
     const [classes, setClasses] = useState<Class[]>([]);
@@ -72,20 +72,22 @@ export default function TeacherDashboard() {
     const [selectedStudentIds, setSelectedStudentIds] = useState<number[]>([]);
     const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
 
-    const allStudents: Student[] = [
-        { id: 1, name: "Alice Johnson", email: "alice@school.com", grade: "A" },
-        { id: 2, name: "Bob Smith", email: "bob@school.com", grade: "B+" },
-        { id: 3, name: "Carol Williams", email: "carol@school.com", grade: "A-" },
-        { id: 4, name: "David Brown", email: "david@school.com", grade: "B" },
-        { id: 5, name: "Emma Davis", email: "emma@school.com", grade: "A+" },
-        { id: 6, name: "Frank Miller", email: "frank@school.com", grade: "B" },
-        { id: 7, name: "Grace Lee", email: "grace@school.com", grade: "A" },
-        { id: 8, name: "Henry Wilson", email: "henry@school.com", grade: "B+" },
-        { id: 9, name: "Ivy Martinez", email: "ivy@school.com", grade: "A-" },
-        { id: 10, name: "Jack Thompson", email: "jack@school.com", grade: "B" },
-        { id: 11, name: "Kate Anderson", email: "kate@school.com", grade: "A" },
-        { id: 12, name: "Liam Garcia", email: "liam@school.com", grade: "B+" },
-    ];
+    // const allStudents: Student[] = [
+    //     { id: 1, name: "Alice Johnson", email: "alice@school.com", grade: "A" },
+    //     { id: 2, name: "Bob Smith", email: "bob@school.com", grade: "B+" },
+    //     { id: 3, name: "Carol Williams", email: "carol@school.com", grade: "A-" },
+    //     { id: 4, name: "David Brown", email: "david@school.com", grade: "B" },
+    //     { id: 5, name: "Emma Davis", email: "emma@school.com", grade: "A+" },
+    //     { id: 6, name: "Frank Miller", email: "frank@school.com", grade: "B" },
+    //     { id: 7, name: "Grace Lee", email: "grace@school.com", grade: "A" },
+    //     { id: 8, name: "Henry Wilson", email: "henry@school.com", grade: "B+" },
+    //     { id: 9, name: "Ivy Martinez", email: "ivy@school.com", grade: "A-" },
+    //     { id: 10, name: "Jack Thompson", email: "jack@school.com", grade: "B" },
+    //     { id: 11, name: "Kate Anderson", email: "kate@school.com", grade: "A" },
+    //     { id: 12, name: "Liam Garcia", email: "liam@school.com", grade: "B+" },
+    // ];
+
+    const [allStudents, setAllStudents] = useState<Student[]>([]);
 
     const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
     const timeSlots = Array.from({ length: 17 }, (_, i) => {
@@ -177,7 +179,7 @@ export default function TeacherDashboard() {
             setShowEditModal(false);
         }
     };
-    
+
 
     const handleDeleteClass = (id: number): void => {
         setClasses((prev) => prev.filter((c) => c._id !== id));
@@ -186,55 +188,59 @@ export default function TeacherDashboard() {
         setSelectedClass(null);
     };
 
+    const handleGetStudents = async () => {
+        const data = await getAllStudents()
+        setAllStudents(data)
+        console.log(data)
+    }
 
+    // const handleAddStudentsToClass = (): void => {
+    //     if (selectedClass && selectedStudentIds.length > 0) {
+    //         const studentsToAdd = allStudents.filter(student =>
+    //             selectedStudentIds.includes(student.id) &&
+    //             !selectedClass.studentList.some(s => s.id === student.id)
+    //         );
 
-    const handleAddStudentsToClass = (): void => {
-        if (selectedClass && selectedStudentIds.length > 0) {
-            const studentsToAdd = allStudents.filter(student =>
-                selectedStudentIds.includes(student.id) &&
-                !selectedClass.studentList.some(s => s.id === student.id)
-            );
+    //         const updatedClasses = classes.map(cls =>
+    //             cls._id === selectedClass._id
+    //                 ? {
+    //                     ...cls,
+    //                     studentList: [...cls.studentList, ...studentsToAdd],
+    //                     students: cls.studentList.length + studentsToAdd.length
+    //                 }
+    //                 : cls
+    //         );
 
-            const updatedClasses = classes.map(cls =>
-                cls._id === selectedClass._id
-                    ? {
-                        ...cls,
-                        studentList: [...cls.studentList, ...studentsToAdd],
-                        students: cls.studentList.length + studentsToAdd.length
-                    }
-                    : cls
-            );
+    //         setClasses(updatedClasses);
+    //         setSelectedClass({
+    //             ...selectedClass,
+    //             studentList: [...selectedClass.studentList, ...studentsToAdd],
+    //             students: selectedClass.studentList.length + studentsToAdd.length
+    //         });
+    //         setSelectedStudentIds([]);
+    //         setShowAddStudentModal(false);
+    //     }
+    // };
 
-            setClasses(updatedClasses);
-            setSelectedClass({
-                ...selectedClass,
-                studentList: [...selectedClass.studentList, ...studentsToAdd],
-                students: selectedClass.studentList.length + studentsToAdd.length
-            });
-            setSelectedStudentIds([]);
-            setShowAddStudentModal(false);
-        }
-    };
-
-    const handleRemoveStudent = (classId: number, studentId: number): void => {
-        const updatedClasses = classes.map(cls =>
-            cls._id === classId
-                ? {
-                    ...cls,
-                    studentList: cls.studentList.filter(s => s.id !== studentId),
-                    students: cls.studentList.length - 1
-                }
-                : cls
-        );
-        setClasses(updatedClasses);
-        if (selectedClass && selectedClass._id === classId) {
-            setSelectedClass({
-                ...selectedClass,
-                studentList: selectedClass.studentList.filter(s => s.id !== studentId),
-                students: selectedClass.studentList.length - 1
-            });
-        }
-    };
+    // const handleRemoveStudent = (classId: number, studentId: number): void => {
+    //     const updatedClasses = classes.map(cls =>
+    //         cls._id === classId
+    //             ? {
+    //                 ...cls,
+    //                 studentList: cls.studentList.filter(s => s.id !== studentId),
+    //                 students: cls.studentList.length - 1
+    //             }
+    //             : cls
+    //     );
+    //     setClasses(updatedClasses);
+    //     if (selectedClass && selectedClass._id === classId) {
+    //         setSelectedClass({
+    //             ...selectedClass,
+    //             studentList: selectedClass.studentList.filter(s => s.id !== studentId),
+    //             students: selectedClass.studentList.length - 1
+    //         });
+    //     }
+    // };
 
     const toggleStudentSelection = (studentId: number): void => {
         setSelectedStudentIds(prev =>
@@ -252,7 +258,7 @@ export default function TeacherDashboard() {
 
     const totalClasses = classes.length;
     const totalStudents = classes.reduce((sum, cls) => sum + cls.students, 0);
-    const uniqueStudents = new Set(classes.flatMap(cls => cls.studentList.map(s => s.id))).size;
+    const uniqueStudents = new Set(classes.flatMap(cls => cls.studentList.map(s => s._id))).size;
 
     // Loading state
     if (isLoading || !authUser) {
@@ -750,7 +756,18 @@ export default function TeacherDashboard() {
             {/* View Students Modal */}
             {showStudentsModal && selectedClass && (
                 <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm p-4">
-                    <div className="bg-slate-800 border border-slate-700 rounded-xl p-8 max-w-3xl w-full shadow-2xl max-h-[80vh] overflow-y-auto">
+                    <div className="relative bg-slate-800 border border-slate-700 rounded-xl p-8 max-w-3xl w-full shadow-2xl max-h-[80vh] overflow-y-auto">
+
+                        {/* Close (X) Button */}
+                        <button
+                            onClick={() => setShowStudentsModal(false)}
+                            className="absolute top-4 right-4 text-slate-400 hover:text-white transition"
+                            aria-label="Close"
+                        >
+                            <X size={22} />
+                        </button>
+
+                        {/* Header */}
                         <div className="flex items-start justify-between mb-6">
                             <div>
                                 <h3 className="text-2xl font-bold text-white mb-2">
@@ -760,15 +777,19 @@ export default function TeacherDashboard() {
                                     {selectedClass.dayOfWeek} • {formatTime(selectedClass.startTime)} - {formatTime(selectedClass.endTime)}
                                 </p>
                             </div>
-                            <div className={`w-4 h-4 ${getColorClasses(selectedClass.color, 'bg')} rounded-full`}></div>
+                            <div
+                                className={`w-4 h-4 ${getColorClasses(selectedClass.color, 'bg')} rounded-full`}
+                            ></div>
                         </div>
 
+                        {/* Body */}
                         {selectedClass.studentList.length === 0 ? (
                             <div className="text-center py-12">
                                 <Users className="mx-auto text-slate-600 mb-4" size={48} />
                                 <p className="text-slate-400 mb-6">No students enrolled yet.</p>
                                 <button
                                     onClick={() => {
+                                        handleGetStudents();
                                         setShowAddStudentModal(true);
                                         setSelectedStudentIds([]);
                                     }}
@@ -786,33 +807,40 @@ export default function TeacherDashboard() {
                                                 <th className="px-4 py-3 text-slate-300 font-semibold">Name</th>
                                                 <th className="px-4 py-3 text-slate-300 font-semibold">Email</th>
                                                 <th className="px-4 py-3 text-slate-300 font-semibold">Grade</th>
-                                                <th className="px-4 py-3 text-slate-300 font-semibold">Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {selectedClass.studentList.map((student) => (
-                                                <tr key={student.id} className="hover:bg-slate-700/30 transition border-b border-slate-700/50">
-                                                    <td className="px-4 py-3 text-slate-200 font-medium">{student.name}</td>
-                                                    <td className="px-4 py-3 text-slate-400">{student.email}</td>
-                                                    <td className="px-4 py-3">
-                                                        <span className="bg-cyan-500/20 text-cyan-300 px-3 py-1 rounded-lg font-semibold border border-cyan-500/30 text-sm">
-                                                            {student.grade}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-4 py-3">
-                                                        <button
-                                                            onClick={() => handleRemoveStudent(selectedClass._id, student.id)}
-                                                            className="text-red-400 hover:text-red-300 transition p-1 hover:bg-red-500/10 rounded"
-                                                        >
-                                                            <Trash2 size={16} />
-                                                        </button>
+                                            {allStudents && allStudents.length > 0 ? (
+                                                allStudents.map((student, i) => (
+                                                    <tr
+                                                        key={i}
+                                                        className="hover:bg-slate-700/30 transition border-b border-slate-700/50"
+                                                    >
+                                                        <td className="px-4 py-3 text-slate-200 font-medium">
+                                                            {student?.studentName}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-slate-400">
+                                                            {student.studentId || "—"}
+                                                        </td>
+                                                        <td className="px-4 py-3">
+                                                            <span className="bg-cyan-500/20 text-cyan-300 px-3 py-1 rounded-lg font-semibold border border-cyan-500/30 text-sm">
+                                                                {student.role}
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan={3} className="text-center py-6 text-slate-400">
+                                                        No students enrolled in this course
                                                     </td>
                                                 </tr>
-                                            ))}
+                                            )}
                                         </tbody>
                                     </table>
                                 </div>
 
+                                {/* Footer */}
                                 <div className="flex gap-3 justify-end">
                                     <button
                                         onClick={() => {
@@ -836,6 +864,7 @@ export default function TeacherDashboard() {
                 </div>
             )}
 
+
             {/* Add Students to Class Modal */}
             {showAddStudentModal && selectedClass && (
                 <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm p-4">
@@ -851,62 +880,53 @@ export default function TeacherDashboard() {
                             <table className="min-w-full text-left border-collapse">
                                 <thead>
                                     <tr className="border-b border-slate-700">
-                                        <th className="px-4 py-3 text-slate-300 font-semibold">
-                                            <input
-                                                type="checkbox"
-                                                onChange={(e) => {
-                                                    if (e.target.checked) {
-                                                        const availableIds = allStudents
-                                                            .filter(s => !selectedClass.studentList.some(enrolled => enrolled.id === s.id))
-                                                            .map(s => s.id);
-                                                        setSelectedStudentIds(availableIds);
-                                                    } else {
-                                                        setSelectedStudentIds([]);
-                                                    }
-                                                }}
-                                                className="w-4 h-4 text-cyan-500 cursor-pointer bg-slate-700 border-slate-600 rounded focus:ring-cyan-500"
-                                            />
-                                        </th>
                                         <th className="px-4 py-3 text-slate-300 font-semibold">Name</th>
-                                        <th className="px-4 py-3 text-slate-300 font-semibold">Email</th>
-                                        <th className="px-4 py-3 text-slate-300 font-semibold">Grade</th>
+                                        <th className="px-4 py-3 text-slate-300 font-semibold">Student ID</th>
+                                        <th className="px-4 py-3 text-slate-300 font-semibold">Role</th>
+                                        <th className="px-4 py-3 text-slate-300 font-semibold text-center">Action</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    {allStudents.map((student) => {
-                                        const isEnrolled = selectedClass.studentList.some(s => s.id === student.id);
-                                        const isSelected = selectedStudentIds.includes(student.id);
 
-                                        return (
+                                <tbody>
+                                    {allStudents && allStudents.length > 0 ? (
+                                        allStudents.map((student, index) => (
                                             <tr
-                                                key={student.id}
-                                                className={`hover:bg-slate-700/30 transition border-b border-slate-700/50 ${isEnrolled ? 'opacity-50' : ''}`}
+                                                key={student._id || index}
+                                                className="hover:bg-slate-700/30 transition border-b border-slate-700/50"
                                             >
-                                                <td className="px-4 py-3">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={isSelected}
-                                                        disabled={isEnrolled}
-                                                        onChange={() => toggleStudentSelection(student.id)}
-                                                        className="w-4 h-4 text-cyan-500 cursor-pointer bg-slate-700 border-slate-600 rounded focus:ring-cyan-500 disabled:cursor-not-allowed"
-                                                    />
-                                                </td>
                                                 <td className="px-4 py-3 text-slate-200 font-medium">
-                                                    {student.name}
-                                                    {isEnrolled && <span className="ml-2 text-xs text-slate-500">(Enrolled)</span>}
+                                                    {student.studentName}
                                                 </td>
-                                                <td className="px-4 py-3 text-slate-400">{student.email}</td>
+                                                <td className="px-4 py-3 text-slate-400">
+                                                    {student.studentId || "—"}
+                                                </td>
                                                 <td className="px-4 py-3">
                                                     <span className="bg-cyan-500/20 text-cyan-300 px-3 py-1 rounded-lg font-semibold border border-cyan-500/30 text-sm">
-                                                        {student.grade}
+                                                        {student.role}
                                                     </span>
                                                 </td>
+                                                <td className="px-4 py-3 text-center">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="w-5 h-5 accent-cyan-500 cursor-pointer"
+                                                    />
+                                                </td>
                                             </tr>
-                                        );
-                                    })}
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan={4} className="text-center py-6 text-slate-400">
+                                                No students found in the database
+                                            </td>
+                                        </tr>
+                                    )}
                                 </tbody>
                             </table>
+
+
+
                         </div>
+
 
                         <div className="flex gap-3 justify-end">
                             <button
@@ -919,7 +939,7 @@ export default function TeacherDashboard() {
                                 Cancel
                             </button>
                             <button
-                                onClick={handleAddStudentsToClass}
+                                // onClick={handleAddStudentsToClass}
                                 disabled={selectedStudentIds.length === 0}
                                 className="px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-400 hover:to-blue-400 transition font-semibold disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed shadow-lg shadow-cyan-500/30"
                             >
