@@ -13,11 +13,12 @@ export default function AdminDashboard() {
     const { deleteStudent, deleteTeacher, getStudent, getTeacher, students, teachers } = useAdminStore()
 
     useEffect(() => {
-        getLoggedInUser()
-        getTeacher()
-        getStudent()
-    }, [])
-
+        (async () => {
+            await getLoggedInUser();
+            await getTeacher();
+            await getStudent();
+        })();
+    }, []);
 
     const [editingStudent, setEditingStudent] = useState<{ id: number; name: string; studentId: string } | null>(null);
     const [editingTeacher, setEditingTeacher] = useState<{ id: number; name: string; department: string } | null>(null);
@@ -79,7 +80,7 @@ export default function AdminDashboard() {
                                             <button
                                                 className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition font-semibold"
                                                 onClick={() => {
-                                                    deleteStudent(student?._id, authUser?._id)
+                                                    deleteStudent(student?._id)
                                                 }}
                                             >
                                                 Delete
@@ -120,7 +121,7 @@ export default function AdminDashboard() {
                                             <button
                                                 className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition font-semibold"
                                                 onClick={() => {
-                                                    deleteTeacher(teacher?._id, authUser?._id)
+                                                    deleteTeacher(teacher?._id)
                                                 }}
                                             >
                                                 Delete

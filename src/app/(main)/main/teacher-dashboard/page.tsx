@@ -1,10 +1,12 @@
 'use client'
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Trash2, Edit, Plus, Eye, Calendar, Clock, Users, ChevronLeft, ChevronRight } from "lucide-react";
+import useTeacherStore from "@/zustand/useTeacherStore";
+import useAuthStore from "@/zustand/useAuthStore";
 
 interface Class {
-    id: number;
+    _id: number;
     course: string;
     dayOfWeek: string;
     startTime: string;
@@ -30,23 +32,28 @@ interface NewClassInput {
 }
 
 export default function TeacherDashboard() {
-    const [classes, setClasses] = useState<Class[]>([
-        {
-            id: 1,
-            course: "Math 101",
-            dayOfWeek: "Monday",
-            startTime: "09:00",
-            endTime: "10:30",
-            students: 4,
-            color: "cyan",
-            studentList: [
-                { id: 1, name: "Alice Johnson", email: "alice@school.com", grade: "A" },
-                { id: 2, name: "Bob Smith", email: "bob@school.com", grade: "B+" },
-                { id: 3, name: "Carol Williams", email: "carol@school.com", grade: "A-" },
-                { id: 4, name: "David Brown", email: "david@school.com", grade: "B" },
-            ]
-        }
-    ]);
+
+    const { getLoggedInUser, authUser } = useAuthStore()
+    const { getClass, createClass, deleteClass, editClass } = useTeacherStore()
+    const [isLoading, setIsLoading] = useState(true)
+
+    const [classes, setClasses] = useState<Class[]>([]);
+
+    useEffect(() => {
+        (async () => {
+            await getLoggedInUser()
+            const data = await getClass();
+            setClasses(data);
+
+            setIsLoading(false)
+        })()
+    }, [])
+
+    useEffect(() => {
+        console.log("authUser", authUser)
+    }, [authUser])
+
+
 
     const [newClass, setNewClass] = useState<NewClassInput>({
         course: "",
@@ -81,8 +88,8 @@ export default function TeacherDashboard() {
     ];
 
     const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-    const timeSlots = Array.from({ length: 11 }, (_, i) => {
-        const hour = i + 8;
+    const timeSlots = Array.from({ length: 17 }, (_, i) => {
+        const hour = i + 6; // 6 AM to 10 PM (6 + 16 = 22)
         return `${hour.toString().padStart(2, '0')}:00`;
     });
 
@@ -117,8 +124,8 @@ export default function TeacherDashboard() {
 
     const handleAddClass = (): void => {
         if (newClass.course && newClass.dayOfWeek && newClass.startTime && newClass.endTime) {
-            const newClassObj: Class = {
-                id: Date.now(),
+            const newClassObj = {
+                _id: Date.now(),
                 course: newClass.course,
                 dayOfWeek: newClass.dayOfWeek,
                 startTime: newClass.startTime,
@@ -127,7 +134,10 @@ export default function TeacherDashboard() {
                 color: newClass.color,
                 studentList: [],
             };
+
+
             setClasses([...classes, newClassObj]);
+            createClass(authUser?.user?._id, newClass.course, newClass.dayOfWeek, newClass.startTime, newClass.endTime, 0, newClass.color, [])
             setNewClass({
                 course: "",
                 dayOfWeek: "Monday",
@@ -139,22 +149,44 @@ export default function TeacherDashboard() {
         }
     };
 
-    const handleEditClass = (): void => {
-        if (editingClass && editingClass.course && editingClass.dayOfWeek && editingClass.startTime && editingClass.endTime) {
+    const handleEditClass = async (): Promise<void> => {
+        if (
+            editingClass &&
+            editingClass.course &&
+            editingClass.dayOfWeek &&
+            editingClass.startTime &&
+            editingClass.endTime
+        ) {
+            // Update UI first (optimistic update)
             const updatedClasses = classes.map((cls) =>
-                cls.id === editingClass.id ? editingClass : cls
+                cls._id === editingClass._id ? editingClass : cls
             );
             setClasses(updatedClasses);
+
+            // Send to backend
+            await editClass(
+                editingClass._id,
+                editingClass.course,
+                editingClass.dayOfWeek,
+                editingClass.startTime,
+                editingClass.endTime,
+                editingClass.color
+            );
+
             setEditingClass(null);
             setShowEditModal(false);
         }
     };
+    
 
     const handleDeleteClass = (id: number): void => {
-        setClasses(classes.filter((cls) => cls.id !== id));
+        setClasses((prev) => prev.filter((c) => c._id !== id));
+        deleteClass(id);
         setShowDeleteModal(false);
         setSelectedClass(null);
     };
+
+
 
     const handleAddStudentsToClass = (): void => {
         if (selectedClass && selectedStudentIds.length > 0) {
@@ -164,7 +196,7 @@ export default function TeacherDashboard() {
             );
 
             const updatedClasses = classes.map(cls =>
-                cls.id === selectedClass.id
+                cls._id === selectedClass._id
                     ? {
                         ...cls,
                         studentList: [...cls.studentList, ...studentsToAdd],
@@ -186,7 +218,7 @@ export default function TeacherDashboard() {
 
     const handleRemoveStudent = (classId: number, studentId: number): void => {
         const updatedClasses = classes.map(cls =>
-            cls.id === classId
+            cls._id === classId
                 ? {
                     ...cls,
                     studentList: cls.studentList.filter(s => s.id !== studentId),
@@ -195,7 +227,7 @@ export default function TeacherDashboard() {
                 : cls
         );
         setClasses(updatedClasses);
-        if (selectedClass && selectedClass.id === classId) {
+        if (selectedClass && selectedClass._id === classId) {
             setSelectedClass({
                 ...selectedClass,
                 studentList: selectedClass.studentList.filter(s => s.id !== studentId),
@@ -221,6 +253,18 @@ export default function TeacherDashboard() {
     const totalClasses = classes.length;
     const totalStudents = classes.reduce((sum, cls) => sum + cls.students, 0);
     const uniqueStudents = new Set(classes.flatMap(cls => cls.studentList.map(s => s.id))).size;
+
+    // Loading state
+    if (isLoading || !authUser) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-slate-700 border-t-cyan-500 mb-4"></div>
+                    <p className="text-slate-400 text-lg">Loading dashboard...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
@@ -327,7 +371,7 @@ export default function TeacherDashboard() {
                                 </div>
 
                                 {/* Time Slots */}
-                                <div className="relative">
+                                <div className="relative" style={{ minHeight: `${17 * 80}px` }}>
                                     {timeSlots.map((time) => (
                                         <div key={time} className="grid grid-cols-6 h-[80px] border-b border-slate-700/50">
                                             <div className="px-4 py-3 border-r border-slate-700/50 bg-slate-800/30 flex items-start">
@@ -349,7 +393,7 @@ export default function TeacherDashboard() {
                                             const startMin = parseInt(cls.startTime.split(':')[1]);
                                             const endMin = parseInt(cls.endTime.split(':')[1]);
 
-                                            const startSlotIndex = startHour - 8;
+                                            const startSlotIndex = startHour - 6;
                                             const startOffset = (startMin / 60) * 80;
                                             const duration = (endHour - startHour) + (endMin - startMin) / 60;
                                             const height = duration * 80;
@@ -359,7 +403,7 @@ export default function TeacherDashboard() {
 
                                             return (
                                                 <div
-                                                    key={cls.id}
+                                                    key={day}
                                                     onClick={() => {
                                                         setSelectedClass(cls);
                                                         setShowStudentsModal(true);
@@ -398,8 +442,8 @@ export default function TeacherDashboard() {
                 {/* List View */}
                 {viewMode === 'list' && (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {classes.map((cls) => (
-                            <div key={cls.id} className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl shadow-xl hover:shadow-2xl transition border border-slate-700">
+                        {classes.map((cls, i) => (
+                            <div key={i} className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl shadow-xl hover:shadow-2xl transition border border-slate-700">
                                 <div className="flex items-start justify-between mb-4">
                                     <div className="flex items-center gap-3">
                                         <div className={`w-3 h-3 ${getColorClasses(cls.color, 'bg')} rounded-full`}></div>
@@ -460,7 +504,9 @@ export default function TeacherDashboard() {
                 <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm p-4">
                     <div className="bg-slate-800 border border-slate-700 rounded-xl p-8 max-w-md w-full shadow-2xl">
                         <h3 className="text-2xl font-bold mb-6 text-white">Add New Class</h3>
+
                         <div className="space-y-4">
+                            {/* Course Name */}
                             <div>
                                 <label className="block text-sm font-semibold text-slate-300 mb-2">
                                     Course Name
@@ -470,9 +516,13 @@ export default function TeacherDashboard() {
                                     placeholder="e.g., Math 101"
                                     className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white placeholder-slate-400"
                                     value={newClass.course}
-                                    onChange={(e) => setNewClass({ ...newClass, course: e.target.value })}
+                                    onChange={(e) =>
+                                        setNewClass({ ...newClass, course: e.target.value })
+                                    }
                                 />
                             </div>
+
+                            {/* Day of Week */}
                             <div>
                                 <label className="block text-sm font-semibold text-slate-300 mb-2">
                                     Day of Week
@@ -480,13 +530,19 @@ export default function TeacherDashboard() {
                                 <select
                                     className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white"
                                     value={newClass.dayOfWeek}
-                                    onChange={(e) => setNewClass({ ...newClass, dayOfWeek: e.target.value })}
+                                    onChange={(e) =>
+                                        setNewClass({ ...newClass, dayOfWeek: e.target.value })
+                                    }
                                 >
-                                    {daysOfWeek.map(day => (
-                                        <option key={day} value={day}>{day}</option>
+                                    {daysOfWeek.map((day) => (
+                                        <option key={day} value={day}>
+                                            {day}
+                                        </option>
                                     ))}
                                 </select>
                             </div>
+
+                            {/* Start and End Time */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-semibold text-slate-300 mb-2">
@@ -494,41 +550,66 @@ export default function TeacherDashboard() {
                                     </label>
                                     <input
                                         type="time"
+                                        min="06:00"
+                                        max="22:00"
                                         className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white"
                                         value={newClass.startTime}
-                                        onChange={(e) => setNewClass({ ...newClass, startTime: e.target.value })}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            if (value >= "06:00" && value <= "22:00") {
+                                                setNewClass({ ...newClass, startTime: value });
+                                            } else {
+                                                alert("Please select a time between 6:00 AM and 10:00 PM.");
+                                            }
+                                        }}
                                     />
                                 </div>
+
                                 <div>
                                     <label className="block text-sm font-semibold text-slate-300 mb-2">
                                         End Time
                                     </label>
                                     <input
                                         type="time"
+                                        min="06:00"
+                                        max="22:00"
                                         className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-white"
                                         value={newClass.endTime}
-                                        onChange={(e) => setNewClass({ ...newClass, endTime: e.target.value })}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            if (value >= "06:00" && value <= "22:00") {
+                                                setNewClass({ ...newClass, endTime: value });
+                                            } else {
+                                                alert("Please select a time between 6:00 AM and 10:00 PM.");
+                                            }
+                                        }}
                                     />
                                 </div>
                             </div>
+
+                            {/* Color Picker */}
                             <div>
                                 <label className="block text-sm font-semibold text-slate-300 mb-2">
                                     Color
                                 </label>
                                 <div className="flex gap-3">
-                                    {colorOptions.map(color => (
+                                    {colorOptions.map((color) => (
                                         <button
                                             key={color.name}
-                                            onClick={() => setNewClass({ ...newClass, color: color.name })}
+                                            onClick={() =>
+                                                setNewClass({ ...newClass, color: color.name })
+                                            }
                                             className={`w-10 h-10 ${color.class} rounded-lg transition ${newClass.color === color.name
-                                                ? 'ring-4 ring-white/50 scale-110'
-                                                : 'hover:scale-105'
+                                                ? "ring-4 ring-white/50 scale-110"
+                                                : "hover:scale-105"
                                                 }`}
                                         />
                                     ))}
                                 </div>
                             </div>
                         </div>
+
+                        {/* Buttons */}
                         <div className="flex gap-3 justify-end mt-8">
                             <button
                                 onClick={() => setShowAddModal(false)}
@@ -656,7 +737,7 @@ export default function TeacherDashboard() {
                                 Cancel
                             </button>
                             <button
-                                onClick={() => handleDeleteClass(selectedClass.id)}
+                                onClick={() => handleDeleteClass(selectedClass._id)}
                                 className="px-6 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-400 hover:to-red-500 transition font-semibold shadow-lg shadow-red-500/30"
                             >
                                 Delete
@@ -720,7 +801,7 @@ export default function TeacherDashboard() {
                                                     </td>
                                                     <td className="px-4 py-3">
                                                         <button
-                                                            onClick={() => handleRemoveStudent(selectedClass.id, student.id)}
+                                                            onClick={() => handleRemoveStudent(selectedClass._id, student.id)}
                                                             className="text-red-400 hover:text-red-300 transition p-1 hover:bg-red-500/10 rounded"
                                                         >
                                                             <Trash2 size={16} />

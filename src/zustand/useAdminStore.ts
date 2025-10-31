@@ -2,27 +2,27 @@ import { create } from 'zustand'
 
 interface AdminStore {
     students: any[]
-    createStudent: (studentName: string, password: string, authUserId: string) => Promise<any>
-    deleteStudent: (id: string, authUserId: string) => Promise<any>
+    createStudent: (studentName: string, password: string) => Promise<any>
+    deleteStudent: (id: string) => Promise<any>
     getStudent: () => Promise<any>
 
     teachers: any[]
-    createTeacher: (teacherName: string, password: string, authUserId: string) => Promise<any>
-    deleteTeacher: (id: string, authUserId: string) => Promise<any>
+    createTeacher: (teacherName: string, password: string) => Promise<any>
+    deleteTeacher: (id: string) => Promise<any>
     getTeacher: () => Promise<any>
 
 }
 
 const useAdminStore = create<AdminStore>((set, get) => ({
     students: [],
-    createStudent: async (studentName: string, password: string, authUserId: string) => {
+    createStudent: async (studentName: string, password: string) => {
         try {
             let res = await fetch("/api/admin/student/create", {
                 method: 'POST',
                 headers: {
                     'content-type': 'application/json'
                 },
-                body: JSON.stringify({ studentName, password, authUserId })
+                body: JSON.stringify({ studentName, password })
             })
             if (!res.ok) return console.error("Error with the fetch")
 
@@ -31,14 +31,14 @@ const useAdminStore = create<AdminStore>((set, get) => ({
             console.log(error)
         }
     },
-    deleteStudent: async (id: string, authUserId: string) => {
+    deleteStudent: async (id: string) => {
         try {
             let res = await fetch("/api/admin/student/delete", {
                 method: 'DELETE',
                 headers: {
                     'content-type': 'application/json'
                 },
-                body: JSON.stringify({ id, authUserId })
+                body: JSON.stringify({ id })
             })
             if (!res.ok) return console.error("Error with the fetch")
 
@@ -61,14 +61,14 @@ const useAdminStore = create<AdminStore>((set, get) => ({
     },
 
     teachers: [],
-    createTeacher: async (teacherName: string, password: string, authUserId: string) => {
+    createTeacher: async (teacherName: string, password: string) => {
         try {
             let res = await fetch("/api/admin/teacher/create", {
                 method: 'POST',
                 headers: {
                     'content-type': 'application/json'
                 },
-                body: JSON.stringify({ teacherName, password, authUserId })
+                body: JSON.stringify({ teacherName, password })
             })
             if (!res.ok) return console.error("Error with the fetch")
 
@@ -77,14 +77,14 @@ const useAdminStore = create<AdminStore>((set, get) => ({
             console.log(error)
         }
     },
-    deleteTeacher: async (id: string, authUserId: string) => {
+    deleteTeacher: async (id: string) => {
         try {
             let res = await fetch("/api/admin/teacher/delete", {
                 method: 'DELETE',
                 headers: {
                     'content-type': 'application/json'
                 },
-                body: JSON.stringify({ id, authUserId })
+                body: JSON.stringify({ id })
             })
             if (!res.ok) return console.error("Error with the fetch")
 

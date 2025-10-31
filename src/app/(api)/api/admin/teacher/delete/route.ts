@@ -6,28 +6,20 @@ import { getAuthenticatedUser } from "@/utils/verifyUser";
 export const DELETE = async (req: Request) => {
     try {
         const body = await req.json();
-        const { id, authUserId } = body;
+        const { id } = body;
 
         await connectDb();
 
         const authenticatedUser = await getAuthenticatedUser();
 
-        // ✅ Check authentication properly
         if (!authenticatedUser || !authenticatedUser.user) {
             return NextResponse.json("Authentication failed.", { status: 401 });
         }
 
-        // ✅ Ensure user is admin
-        if (authenticatedUser.role !== "admin") {
-            return NextResponse.json("Error. You need to be ADMIN to do this.", { status: 403 });
+        if (authenticatedUser?.user?.role !== "admin") {
+            return NextResponse.json("Error. You need to be ADMIN to do this.", { status: 408 });
         }
 
-        // ✅ Fix: _id comes from authenticatedUser.user
-        if (authenticatedUser._id.toString() !== authUserId) {
-            return NextResponse.json("You are not allowed to do this. This is not your account.", { status: 403 });
-        }
-
-        // ✅ Attempt to delete
         const deletedTeacher = await Teacher.findByIdAndDelete(id);
 
         if (!deletedTeacher) {

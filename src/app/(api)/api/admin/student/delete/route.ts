@@ -21,8 +21,8 @@ export const DELETE = async (req: Request) => {
         }
 
         // ✅ FIX: Access the _id from authenticatedUser.user
-        if (authenticatedUser._id.toString() !== authUserId) {
-            return NextResponse.json("You are not allowed to do this. This is not your account.", { status: 400 });
+        if (authenticatedUser?.user?._id.toString() !== authUserId) {
+            return NextResponse.json("You are not allowed to do this. This is not your account.", { status: 403 });
         }
 
         const deleting = await Student.findByIdAndDelete(id);

@@ -22,8 +22,8 @@ export const POST = async (req: Request) => {
         }
 
         // ✅ Fix: Access _id from authenticatedUser.user
-        if (authenticatedUser._id.toString() !== authUserId) {
-            return NextResponse.json("You are not allowed to do this. This is not your account", { status: 400 })
+        if (authenticatedUser?.user?._id.toString() !== authUserId) {
+            return NextResponse.json("You are not allowed to do this. This is not your account.", { status: 403 });
         }
 
         const ifExist = await Student.findOne({ studentName })

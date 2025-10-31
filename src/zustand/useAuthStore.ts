@@ -14,7 +14,7 @@ const useAuthStore = create<AuthStore>((set, get) => ({
     authUser: null,
     getLoggedInUser: async () => {
         try {
-            let res = await fetch('/api/auth/me');
+            let res = await fetch('/api/auth/me', { credentials: 'include' });
             if (!res.ok) {
                 set({ authUser: null });
                 return null;
@@ -22,7 +22,6 @@ const useAuthStore = create<AuthStore>((set, get) => ({
             const data = await res.json();
             set({ authUser: data })
             return data;
-
         } catch (error) {
             console.log(error);
             return null;
@@ -36,13 +35,11 @@ const useAuthStore = create<AuthStore>((set, get) => ({
                     'content-type': 'application/json'
                 },
                 body: JSON.stringify({ username, password }),
-                credentials: 'include', // ✅ this allows cookies to be stored
+                credentials: 'include', 
             })
             const data = await res.json()
             if (!res.ok) return data
             set({ authUser: data })
-
-            console.log(data)
             return data
         } catch (error) {
             console.log(error)
