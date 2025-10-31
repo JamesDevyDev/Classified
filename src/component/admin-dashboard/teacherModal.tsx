@@ -27,7 +27,7 @@ const TeacherModal = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        createTeacher(teacherName, password, authUser?._id)
+        createTeacher(teacherName, password)
 
         // Reset fields and close modal
         setTeacherName('')
