@@ -23,7 +23,7 @@ const StudentModal: React.FC = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        createStudent(studentName, password, authUser?._id)
+        createStudent(studentName, password)
 
         // Reset and close modal
         setStudentName('')
