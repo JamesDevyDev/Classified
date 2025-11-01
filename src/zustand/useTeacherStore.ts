@@ -6,6 +6,7 @@ interface TeacherStore {
     deleteClass: (id: number) => Promise<any>
     editClass: (id: number, course?: string, dayOfWeek?: string, startTime?: string, endTime?: string, color?: string) => Promise<any>
     getAllStudents: () => Promise<any>
+    addStudentToClass: (studentId: any, classId: any) => Promise<any>
 }
 
 const useTeacherStore = create<TeacherStore>((set, get) => ({
@@ -89,6 +90,23 @@ const useTeacherStore = create<TeacherStore>((set, get) => ({
                 headers: {
                     'content-type': 'application/json'
                 }
+            })
+            if (!res.ok) return console.error("Error with the fetch")
+
+            const data = await res.json()
+            return data
+        } catch (error) {
+            console.log(error)
+        }
+    },
+    addStudentToClass: async (classId: any, studentId: any) => {
+        try {
+            let res = await fetch("/api/teacher/students/addStudentToClass", {
+                method: 'POST',
+                headers: {
+                    'content-type': 'application/json'
+                },
+                body: JSON.stringify({ classId, studentId })
             })
             if (!res.ok) return console.error("Error with the fetch")
 

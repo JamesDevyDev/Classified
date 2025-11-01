@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from "react";
-import { Trash2, Edit, Plus, Eye, Calendar, Clock, Users, X} from "lucide-react";
+import { Trash2, Edit, Plus, Eye, Calendar, Clock, Users, X } from "lucide-react";
 import useTeacherStore from "@/zustand/useTeacherStore";
 import useAuthStore from "@/zustand/useAuthStore";
 
@@ -34,7 +34,7 @@ interface NewClassInput {
 export default function TeacherDashboard() {
 
     const { getLoggedInUser, authUser } = useAuthStore()
-    const { getClass, createClass, deleteClass, editClass, getAllStudents } = useTeacherStore()
+    const { getClass, createClass, deleteClass, editClass, getAllStudents, addStudentToClass } = useTeacherStore()
     const [isLoading, setIsLoading] = useState(true)
 
     const [classes, setClasses] = useState<Class[]>([]);
@@ -69,24 +69,7 @@ export default function TeacherDashboard() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showStudentsModal, setShowStudentsModal] = useState(false);
     const [showAddStudentModal, setShowAddStudentModal] = useState(false);
-    const [selectedStudentIds, setSelectedStudentIds] = useState<number[]>([]);
     const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
-
-    // const allStudents: Student[] = [
-    //     { id: 1, name: "Alice Johnson", email: "alice@school.com", grade: "A" },
-    //     { id: 2, name: "Bob Smith", email: "bob@school.com", grade: "B+" },
-    //     { id: 3, name: "Carol Williams", email: "carol@school.com", grade: "A-" },
-    //     { id: 4, name: "David Brown", email: "david@school.com", grade: "B" },
-    //     { id: 5, name: "Emma Davis", email: "emma@school.com", grade: "A+" },
-    //     { id: 6, name: "Frank Miller", email: "frank@school.com", grade: "B" },
-    //     { id: 7, name: "Grace Lee", email: "grace@school.com", grade: "A" },
-    //     { id: 8, name: "Henry Wilson", email: "henry@school.com", grade: "B+" },
-    //     { id: 9, name: "Ivy Martinez", email: "ivy@school.com", grade: "A-" },
-    //     { id: 10, name: "Jack Thompson", email: "jack@school.com", grade: "B" },
-    //     { id: 11, name: "Kate Anderson", email: "kate@school.com", grade: "A" },
-    //     { id: 12, name: "Liam Garcia", email: "liam@school.com", grade: "B+" },
-    // ];
-
     const [allStudents, setAllStudents] = useState<Student[]>([]);
 
     const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
@@ -180,7 +163,6 @@ export default function TeacherDashboard() {
         }
     };
 
-
     const handleDeleteClass = (id: number): void => {
         setClasses((prev) => prev.filter((c) => c._id !== id));
         deleteClass(id);
@@ -194,60 +176,14 @@ export default function TeacherDashboard() {
         console.log(data)
     }
 
-    // const handleAddStudentsToClass = (): void => {
-    //     if (selectedClass && selectedStudentIds.length > 0) {
-    //         const studentsToAdd = allStudents.filter(student =>
-    //             selectedStudentIds.includes(student.id) &&
-    //             !selectedClass.studentList.some(s => s.id === student.id)
-    //         );
+    const handleAddStudentsToClass = (studentId: any, classId: any): void => {
+        console.log("Class Id", classId)
+        console.log("Student Id", studentId)
+        addStudentToClass(classId, studentId)
+    };
 
-    //         const updatedClasses = classes.map(cls =>
-    //             cls._id === selectedClass._id
-    //                 ? {
-    //                     ...cls,
-    //                     studentList: [...cls.studentList, ...studentsToAdd],
-    //                     students: cls.studentList.length + studentsToAdd.length
-    //                 }
-    //                 : cls
-    //         );
+    const handleRemoveStudent = (classId: number, studentId: number): void => {
 
-    //         setClasses(updatedClasses);
-    //         setSelectedClass({
-    //             ...selectedClass,
-    //             studentList: [...selectedClass.studentList, ...studentsToAdd],
-    //             students: selectedClass.studentList.length + studentsToAdd.length
-    //         });
-    //         setSelectedStudentIds([]);
-    //         setShowAddStudentModal(false);
-    //     }
-    // };
-
-    // const handleRemoveStudent = (classId: number, studentId: number): void => {
-    //     const updatedClasses = classes.map(cls =>
-    //         cls._id === classId
-    //             ? {
-    //                 ...cls,
-    //                 studentList: cls.studentList.filter(s => s.id !== studentId),
-    //                 students: cls.studentList.length - 1
-    //             }
-    //             : cls
-    //     );
-    //     setClasses(updatedClasses);
-    //     if (selectedClass && selectedClass._id === classId) {
-    //         setSelectedClass({
-    //             ...selectedClass,
-    //             studentList: selectedClass.studentList.filter(s => s.id !== studentId),
-    //             students: selectedClass.studentList.length - 1
-    //         });
-    //     }
-    // };
-
-    const toggleStudentSelection = (studentId: number): void => {
-        setSelectedStudentIds(prev =>
-            prev.includes(studentId)
-                ? prev.filter(id => id !== studentId)
-                : [...prev, studentId]
-        );
     };
 
     const getClassesForDay = (day: string) => {
@@ -791,7 +727,6 @@ export default function TeacherDashboard() {
                                     onClick={() => {
                                         handleGetStudents();
                                         setShowAddStudentModal(true);
-                                        setSelectedStudentIds([]);
                                     }}
                                     className="px-6 py-2.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-400 hover:to-emerald-400 transition font-semibold inline-flex items-center gap-2 shadow-lg shadow-green-500/30"
                                 >
@@ -845,7 +780,6 @@ export default function TeacherDashboard() {
                                     <button
                                         onClick={() => {
                                             setShowAddStudentModal(true);
-                                            setSelectedStudentIds([]);
                                         }}
                                         className="px-6 py-2.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-400 hover:to-emerald-400 transition font-semibold flex items-center gap-2 shadow-lg shadow-green-500/30"
                                     >
@@ -889,30 +823,45 @@ export default function TeacherDashboard() {
 
                                 <tbody>
                                     {allStudents && allStudents.length > 0 ? (
-                                        allStudents.map((student, index) => (
-                                            <tr
-                                                key={student._id || index}
-                                                className="hover:bg-slate-700/30 transition border-b border-slate-700/50"
-                                            >
-                                                <td className="px-4 py-3 text-slate-200 font-medium">
-                                                    {student.studentName}
-                                                </td>
-                                                <td className="px-4 py-3 text-slate-400">
-                                                    {student.studentId || "—"}
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    <span className="bg-cyan-500/20 text-cyan-300 px-3 py-1 rounded-lg font-semibold border border-cyan-500/30 text-sm">
-                                                        {student.role}
-                                                    </span>
-                                                </td>
-                                                <td className="px-4 py-3 text-center">
-                                                    <input
-                                                        type="checkbox"
-                                                        className="w-5 h-5 accent-cyan-500 cursor-pointer"
-                                                    />
-                                                </td>
-                                            </tr>
-                                        ))
+                                        allStudents.map((student, index) => {
+                                            // check if this student's _id is already in the class studentList
+                                            const isAlreadyAdded = selectedClass?.studentList?.some(
+                                                (s) => s._id === student._id
+                                            );
+
+                                            return (
+                                                <tr
+                                                    key={student._id || index}
+                                                    className="hover:bg-slate-700/30 transition border-b border-slate-700/50"
+                                                >
+                                                    <td className="px-4 py-3 text-slate-200 font-medium">
+                                                        {student.studentName}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-slate-400">
+                                                        {student.studentId || "—"}
+                                                    </td>
+                                                    <td className="px-4 py-3">
+                                                        <span className="bg-cyan-500/20 text-cyan-300 px-3 py-1 rounded-lg font-semibold border border-cyan-500/30 text-sm">
+                                                            {student.role}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-3 text-center">
+                                                        {isAlreadyAdded ? (
+                                                            <span className="text-slate-400 text-sm">Added</span>
+                                                        ) : (
+                                                            <button
+                                                                // FIX TO
+
+                                                                onClick={() => handleAddStudentsToClass(selectedClass._id, student._id)}
+                                                                className="px-3 py-1 text-white bg-cyan-500 rounded-lg hover:bg-cyan-400 text-sm font-semibold"
+                                                            >
+                                                                Add
+                                                            </button>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })
                                     ) : (
                                         <tr>
                                             <td colSpan={4} className="text-center py-6 text-slate-400">
@@ -932,19 +881,12 @@ export default function TeacherDashboard() {
                             <button
                                 onClick={() => {
                                     setShowAddStudentModal(false);
-                                    setSelectedStudentIds([]);
                                 }}
                                 className="px-6 py-2.5 text-slate-300 bg-slate-700/70 rounded-lg hover:bg-slate-600/70 transition font-semibold border border-slate-600"
                             >
                                 Cancel
                             </button>
-                            <button
-                                // onClick={handleAddStudentsToClass}
-                                disabled={selectedStudentIds.length === 0}
-                                className="px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-400 hover:to-blue-400 transition font-semibold disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed shadow-lg shadow-cyan-500/30"
-                            >
-                                Add {selectedStudentIds.length} Student{selectedStudentIds.length !== 1 ? 's' : ''}
-                            </button>
+
                         </div>
                     </div>
                 </div>
