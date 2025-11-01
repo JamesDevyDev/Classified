@@ -1,48 +1,61 @@
 import { NextResponse } from "next/server";
 import connectDb from "@/utils/connectDb";
 import Class from "@/utils/model/class/teacher/Class.Model";
+import Student from "@/utils/model/users/student/Student.model";
 
 export const POST = async (req: Request) => {
     try {
         await connectDb();
 
         const { classId, studentId } = await req.json();
+        console.log(classId, studentId)
 
-        console.log("Class Id ", classId)
+       
 
-        // const cls = await Class.findById(classId)
+        if (!classId || !studentId) {
+            console.log("missing params")
+            return NextResponse.json({ message: "Missing parameters" }, { status: 400 });
+        }
 
-        // console.log(cls)
+        const cls = await Class.findById(classId);
+        if (!cls) {
+            console.log("class not found")
+            return NextResponse.json({ message: "Class not found" }, { status: 404 });
+        }
 
-        // if (!classId || !studentId) {
-        //     return NextResponse.json({ message: "Missing parameters" }, { status: 400 });
-        // }
+        const student = await Student.findById(studentId);
+        if (!student) {
+            console.log("student not found")
+            return NextResponse.json({ message: "Student not found" }, { status: 404 });
+        }
 
-        // const cls = await Class.findById(classId);
-        // if (!cls) {
-        //     return NextResponse.json({ message: "Class not found" }, { status: 404 });
-        // }
+        let action: "added" | "removed";
 
-        // let action: "added" | "removed";
+        // Check if student is already in the class
+        const index = cls.studentList.findIndex((id: any) => id.toString() === studentId);
 
-        // // Check if student is already in the class
-        // const index = cls.studentList.findIndex((id: any) => id.toString() === studentId);
+        if (index !== -1) {
+            // Remove student from class
+            cls.studentList.splice(index, 1);
+            // Also remove class from student's list
+            student.class = student.class.filter((id: any) => id !== classId);
+            action = "removed";
+        } else {
+            // Add student to class
+            cls.studentList.push(studentId);
+            // Add class to student's list (avoid duplicates)
+            if (!student.class.includes(classId)) {
+                student.class.push(classId);
+            }
+            action = "added";
+        }
 
-        // if (index !== -1) {
-        //     // Remove student
-        //     cls.studentList.splice(index, 1);
-        //     action = "removed";
-        // } else {
-        //     // Add student
-        //     cls.studentList.push(studentId);
-        //     action = "added";
-        // }
+        // Save both documents
+        await Promise.all([cls.save(), student.save()]);
 
-        // await cls.save();
+        return NextResponse.json({ success: true, action });
 
-        // return NextResponse.json({ success: true, action });
-
-        return NextResponse.json("Works")
+        // return NextResponse.json("works")
 
     } catch (error) {
         console.error(error);

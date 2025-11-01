@@ -118,23 +118,23 @@ export default function TeacherDashboard() {
 
             // Optimistic update
             setClasses([...classes, newClassObj]);
-            
+
             // Call backend
             await createClass(
-                authUser?.user?._id, 
-                newClass.course, 
-                newClass.dayOfWeek, 
-                newClass.startTime, 
-                newClass.endTime, 
-                0, 
-                newClass.color, 
+                authUser?.user?._id,
+                newClass.course,
+                newClass.dayOfWeek,
+                newClass.startTime,
+                newClass.endTime,
+                0,
+                newClass.color,
                 []
             );
-            
+
             // Refresh from backend
             const updatedClasses = await getClass();
             setClasses(updatedClasses);
-            
+
             setNewClass({
                 course: "",
                 dayOfWeek: "Monday",
@@ -169,7 +169,7 @@ export default function TeacherDashboard() {
                 editingClass.endTime,
                 editingClass.color
             );
-            
+
             // Refresh from backend
             const refreshedClasses = await getClass();
             setClasses(refreshedClasses);
@@ -182,14 +182,14 @@ export default function TeacherDashboard() {
     const handleDeleteClass = async (id: number): Promise<void> => {
         // Optimistic update
         setClasses((prev) => prev.filter((c) => c._id !== id));
-        
+
         // Call backend
         await deleteClass(id);
-        
+
         // Refresh from backend
         const updatedClasses = await getClass();
         setClasses(updatedClasses);
-        
+
         setShowDeleteModal(false);
         setSelectedClass(null);
     };
@@ -203,14 +203,14 @@ export default function TeacherDashboard() {
     const handleAddStudentsToClass = async (classId: any, studentId: any): Promise<void> => {
         console.log("Class Id", classId);
         console.log("Student Id", studentId);
-        
+
         // Call backend
         await addStudentToClass(classId, studentId);
-        
+
         // Refresh classes from backend
         const updatedClasses = await getClass();
         setClasses(updatedClasses);
-        
+
         // Update selectedClass if it matches
         // const updatedSelectedClass = updatedClasses.find(cls => cls._id === classId);
         // if (updatedSelectedClass) {
@@ -768,24 +768,40 @@ export default function TeacherDashboard() {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {selectedClass.studentList.map((student) => (
-                                                <tr
-                                                    key={student._id}
-                                                    className="hover:bg-slate-700/30 transition border-b border-slate-700/50"
-                                                >
-                                                    <td className="px-4 py-3 text-slate-200 font-medium">
-                                                        {student.studentName}
-                                                    </td>
-                                                    <td className="px-4 py-3 text-slate-400">
-                                                        {student.studentId || "—"}
-                                                    </td>
-                                                    <td className="px-4 py-3">
-                                                        <span className="bg-cyan-500/20 text-cyan-300 px-3 py-1 rounded-lg font-semibold border border-cyan-500/30 text-sm">
-                                                            {student.role}
-                                                        </span>
+                                            {selectedClass.studentList && selectedClass.studentList.length > 0 ? (
+                                                selectedClass.studentList.map((student) => (
+                                                    <tr
+                                                        key={student._id}
+                                                        className="hover:bg-slate-700/30 transition border-b border-slate-700/50"
+                                                    >
+                                                        <td className="px-4 py-3 text-slate-200 font-medium">
+                                                            {student.studentName}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-slate-400">
+                                                            {student.studentId || "—"}
+                                                        </td>
+                                                        <td className="px-4 py-3">
+                                                            <span className="bg-cyan-500/20 text-cyan-300 px-3 py-1 rounded-lg font-semibold border border-cyan-500/30 text-sm">
+                                                                {student.role}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-4 py-3 text-center">
+                                                            <button
+                                                                onClick={() => handleAddStudentsToClass(selectedClass._id, student._id)}
+                                                                className="text-red-500 hover:text-red-700 focus:outline-none"
+                                                            >
+                                                                Delete
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    <td  className="text-center text-gray-500">
+                                                        No students enrolled
                                                     </td>
                                                 </tr>
-                                            ))}
+                                            )}
                                         </tbody>
                                     </table>
                                 </div>

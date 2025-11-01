@@ -35,7 +35,7 @@ const classSchema = new mongoose.Schema({
     },
     studentList: {
         type: [mongoose.Schema.Types.ObjectId],
-        ref: "Student", 
+        ref: "student", 
         default: [] 
     }
 })
