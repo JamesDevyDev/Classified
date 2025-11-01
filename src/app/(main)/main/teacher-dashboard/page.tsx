@@ -32,28 +32,24 @@ interface NewClassInput {
 }
 
 export default function TeacherDashboard() {
-
-    const { getLoggedInUser, authUser } = useAuthStore()
-    const { getClass, createClass, deleteClass, editClass, getAllStudents, addStudentToClass } = useTeacherStore()
-    const [isLoading, setIsLoading] = useState(true)
+    const { getLoggedInUser, authUser } = useAuthStore();
+    const { getClass, createClass, deleteClass, editClass, getAllStudents, addStudentToClass } = useTeacherStore();
+    const [isLoading, setIsLoading] = useState(true);
 
     const [classes, setClasses] = useState<Class[]>([]);
 
     useEffect(() => {
         (async () => {
-            await getLoggedInUser()
+            await getLoggedInUser();
             const data = await getClass();
             setClasses(data);
-
-            setIsLoading(false)
-        })()
-    }, [])
+            setIsLoading(false);
+        })();
+    }, [getLoggedInUser, getClass]);
 
     useEffect(() => {
-        console.log("authUser", authUser)
-    }, [authUser])
-
-
+        console.log("authUser", authUser);
+    }, [authUser]);
 
     const [newClass, setNewClass] = useState<NewClassInput>({
         course: "",
@@ -74,7 +70,7 @@ export default function TeacherDashboard() {
 
     const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
     const timeSlots = Array.from({ length: 17 }, (_, i) => {
-        const hour = i + 6; // 6 AM to 10 PM (6 + 16 = 22)
+        const hour = i + 6;
         return `${hour.toString().padStart(2, '0')}:00`;
     });
 
@@ -107,7 +103,7 @@ export default function TeacherDashboard() {
         return `${displayHour}:${minutes} ${ampm}`;
     };
 
-    const handleAddClass = (): void => {
+    const handleAddClass = async (): Promise<void> => {
         if (newClass.course && newClass.dayOfWeek && newClass.startTime && newClass.endTime) {
             const newClassObj = {
                 _id: Date.now(),
@@ -120,9 +116,25 @@ export default function TeacherDashboard() {
                 studentList: [],
             };
 
-
+            // Optimistic update
             setClasses([...classes, newClassObj]);
-            createClass(authUser?.user?._id, newClass.course, newClass.dayOfWeek, newClass.startTime, newClass.endTime, 0, newClass.color, [])
+            
+            // Call backend
+            await createClass(
+                authUser?.user?._id, 
+                newClass.course, 
+                newClass.dayOfWeek, 
+                newClass.startTime, 
+                newClass.endTime, 
+                0, 
+                newClass.color, 
+                []
+            );
+            
+            // Refresh from backend
+            const updatedClasses = await getClass();
+            setClasses(updatedClasses);
+            
             setNewClass({
                 course: "",
                 dayOfWeek: "Monday",
@@ -142,13 +154,13 @@ export default function TeacherDashboard() {
             editingClass.startTime &&
             editingClass.endTime
         ) {
-            // Update UI first (optimistic update)
+            // Optimistic update
             const updatedClasses = classes.map((cls) =>
                 cls._id === editingClass._id ? editingClass : cls
             );
             setClasses(updatedClasses);
 
-            // Send to backend
+            // Call backend
             await editClass(
                 editingClass._id,
                 editingClass.course,
@@ -157,46 +169,65 @@ export default function TeacherDashboard() {
                 editingClass.endTime,
                 editingClass.color
             );
+            
+            // Refresh from backend
+            const refreshedClasses = await getClass();
+            setClasses(refreshedClasses);
 
             setEditingClass(null);
             setShowEditModal(false);
         }
     };
 
-    const handleDeleteClass = (id: number): void => {
+    const handleDeleteClass = async (id: number): Promise<void> => {
+        // Optimistic update
         setClasses((prev) => prev.filter((c) => c._id !== id));
-        deleteClass(id);
+        
+        // Call backend
+        await deleteClass(id);
+        
+        // Refresh from backend
+        const updatedClasses = await getClass();
+        setClasses(updatedClasses);
+        
         setShowDeleteModal(false);
         setSelectedClass(null);
     };
 
     const handleGetStudents = async () => {
-        const data = await getAllStudents()
-        setAllStudents(data)
-        console.log(data)
-    }
-
-    const handleAddStudentsToClass = (studentId: any, classId: any): void => {
-        console.log("Class Id", classId)
-        console.log("Student Id", studentId)
-        addStudentToClass(classId, studentId)
+        const data = await getAllStudents();
+        setAllStudents(data);
+        console.log(data);
     };
 
-    const handleRemoveStudent = (classId: number, studentId: number): void => {
-
+    const handleAddStudentsToClass = async (classId: any, studentId: any): Promise<void> => {
+        console.log("Class Id", classId);
+        console.log("Student Id", studentId);
+        
+        // Call backend
+        await addStudentToClass(classId, studentId);
+        
+        // Refresh classes from backend
+        const updatedClasses = await getClass();
+        setClasses(updatedClasses);
+        
+        // Update selectedClass if it matches
+        // const updatedSelectedClass = updatedClasses.find(cls => cls._id === classId);
+        // if (updatedSelectedClass) {
+        //     setSelectedClass(updatedSelectedClass);
+        // }
     };
 
-    const getClassesForDay = (day: string) => {
-        return classes.filter(cls => cls.dayOfWeek === day).sort((a, b) =>
+    const getClassesForDay = (day: string): Class[] => {
+        return classes.filter((cls: Class) => cls.dayOfWeek === day).sort((a: Class, b: Class) =>
             a.startTime.localeCompare(b.startTime)
         );
     };
 
     const totalClasses = classes.length;
-    const totalStudents = classes.reduce((sum, cls) => sum + cls.students, 0);
-    const uniqueStudents = new Set(classes.flatMap(cls => cls.studentList.map(s => s._id))).size;
+    const totalStudents = classes.reduce((sum: number, cls: Class) => sum + cls.students, 0);
+    const uniqueStudents = new Set(classes.flatMap((cls: Class) => cls.studentList.map((s: Student) => s._id))).size;
 
-    // Loading state
     if (isLoading || !authUser) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
@@ -326,7 +357,7 @@ export default function TeacherDashboard() {
                                         </div>
                                     ))}
 
-                                    {/* Absolute positioned classes that span multiple slots */}
+                                    {/* Absolute positioned classes */}
                                     {daysOfWeek.map((day, dayIndex) => {
                                         const dayClasses = getClassesForDay(day);
                                         return dayClasses.map((cls) => {
@@ -345,7 +376,7 @@ export default function TeacherDashboard() {
 
                                             return (
                                                 <div
-                                                    key={day}
+                                                    key={cls._id}
                                                     onClick={() => {
                                                         setSelectedClass(cls);
                                                         setShowStudentsModal(true);
@@ -384,8 +415,8 @@ export default function TeacherDashboard() {
                 {/* List View */}
                 {viewMode === 'list' && (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {classes.map((cls, i) => (
-                            <div key={i} className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl shadow-xl hover:shadow-2xl transition border border-slate-700">
+                        {classes.map((cls) => (
+                            <div key={cls._id} className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl shadow-xl hover:shadow-2xl transition border border-slate-700">
                                 <div className="flex items-start justify-between mb-4">
                                     <div className="flex items-center gap-3">
                                         <div className={`w-3 h-3 ${getColorClasses(cls.color, 'bg')} rounded-full`}></div>
@@ -427,6 +458,7 @@ export default function TeacherDashboard() {
                                     </button>
                                     <button
                                         onClick={() => {
+                                            console.log(cls);
                                             setSelectedClass(cls);
                                             setShowDeleteModal(true);
                                         }}
@@ -448,7 +480,6 @@ export default function TeacherDashboard() {
                         <h3 className="text-2xl font-bold mb-6 text-white">Add New Class</h3>
 
                         <div className="space-y-4">
-                            {/* Course Name */}
                             <div>
                                 <label className="block text-sm font-semibold text-slate-300 mb-2">
                                     Course Name
@@ -464,7 +495,6 @@ export default function TeacherDashboard() {
                                 />
                             </div>
 
-                            {/* Day of Week */}
                             <div>
                                 <label className="block text-sm font-semibold text-slate-300 mb-2">
                                     Day of Week
@@ -484,7 +514,6 @@ export default function TeacherDashboard() {
                                 </select>
                             </div>
 
-                            {/* Start and End Time */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-semibold text-slate-300 mb-2">
@@ -529,7 +558,6 @@ export default function TeacherDashboard() {
                                 </div>
                             </div>
 
-                            {/* Color Picker */}
                             <div>
                                 <label className="block text-sm font-semibold text-slate-300 mb-2">
                                     Color
@@ -551,7 +579,6 @@ export default function TeacherDashboard() {
                             </div>
                         </div>
 
-                        {/* Buttons */}
                         <div className="flex gap-3 justify-end mt-8">
                             <button
                                 onClick={() => setShowAddModal(false)}
@@ -693,8 +720,6 @@ export default function TeacherDashboard() {
             {showStudentsModal && selectedClass && (
                 <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm p-4">
                     <div className="relative bg-slate-800 border border-slate-700 rounded-xl p-8 max-w-3xl w-full shadow-2xl max-h-[80vh] overflow-y-auto">
-
-                        {/* Close (X) Button */}
                         <button
                             onClick={() => setShowStudentsModal(false)}
                             className="absolute top-4 right-4 text-slate-400 hover:text-white transition"
@@ -703,7 +728,6 @@ export default function TeacherDashboard() {
                             <X size={22} />
                         </button>
 
-                        {/* Header */}
                         <div className="flex items-start justify-between mb-6">
                             <div>
                                 <h3 className="text-2xl font-bold text-white mb-2">
@@ -718,7 +742,6 @@ export default function TeacherDashboard() {
                             ></div>
                         </div>
 
-                        {/* Body */}
                         {selectedClass.studentList.length === 0 ? (
                             <div className="text-center py-12">
                                 <Users className="mx-auto text-slate-600 mb-4" size={48} />
@@ -740,45 +763,37 @@ export default function TeacherDashboard() {
                                         <thead>
                                             <tr className="border-b border-slate-700">
                                                 <th className="px-4 py-3 text-slate-300 font-semibold">Name</th>
-                                                <th className="px-4 py-3 text-slate-300 font-semibold">Email</th>
-                                                <th className="px-4 py-3 text-slate-300 font-semibold">Grade</th>
+                                                <th className="px-4 py-3 text-slate-300 font-semibold">Student ID</th>
+                                                <th className="px-4 py-3 text-slate-300 font-semibold">Role</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {allStudents && allStudents.length > 0 ? (
-                                                allStudents.map((student, i) => (
-                                                    <tr
-                                                        key={i}
-                                                        className="hover:bg-slate-700/30 transition border-b border-slate-700/50"
-                                                    >
-                                                        <td className="px-4 py-3 text-slate-200 font-medium">
-                                                            {student?.studentName}
-                                                        </td>
-                                                        <td className="px-4 py-3 text-slate-400">
-                                                            {student.studentId || "—"}
-                                                        </td>
-                                                        <td className="px-4 py-3">
-                                                            <span className="bg-cyan-500/20 text-cyan-300 px-3 py-1 rounded-lg font-semibold border border-cyan-500/30 text-sm">
-                                                                {student.role}
-                                                            </span>
-                                                        </td>
-                                                    </tr>
-                                                ))
-                                            ) : (
-                                                <tr>
-                                                    <td colSpan={3} className="text-center py-6 text-slate-400">
-                                                        No students enrolled in this course
+                                            {selectedClass.studentList.map((student) => (
+                                                <tr
+                                                    key={student._id}
+                                                    className="hover:bg-slate-700/30 transition border-b border-slate-700/50"
+                                                >
+                                                    <td className="px-4 py-3 text-slate-200 font-medium">
+                                                        {student.studentName}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-slate-400">
+                                                        {student.studentId || "—"}
+                                                    </td>
+                                                    <td className="px-4 py-3">
+                                                        <span className="bg-cyan-500/20 text-cyan-300 px-3 py-1 rounded-lg font-semibold border border-cyan-500/30 text-sm">
+                                                            {student.role}
+                                                        </span>
                                                     </td>
                                                 </tr>
-                                            )}
+                                            ))}
                                         </tbody>
                                     </table>
                                 </div>
 
-                                {/* Footer */}
                                 <div className="flex gap-3 justify-end">
                                     <button
                                         onClick={() => {
+                                            handleGetStudents();
                                             setShowAddStudentModal(true);
                                         }}
                                         className="px-6 py-2.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-400 hover:to-emerald-400 transition font-semibold flex items-center gap-2 shadow-lg shadow-green-500/30"
@@ -797,7 +812,6 @@ export default function TeacherDashboard() {
                     </div>
                 </div>
             )}
-
 
             {/* Add Students to Class Modal */}
             {showAddStudentModal && selectedClass && (
@@ -823,15 +837,14 @@ export default function TeacherDashboard() {
 
                                 <tbody>
                                     {allStudents && allStudents.length > 0 ? (
-                                        allStudents.map((student, index) => {
-                                            // check if this student's _id is already in the class studentList
+                                        allStudents.map((student) => {
                                             const isAlreadyAdded = selectedClass?.studentList?.some(
                                                 (s) => s._id === student._id
                                             );
 
                                             return (
                                                 <tr
-                                                    key={student._id || index}
+                                                    key={student._id}
                                                     className="hover:bg-slate-700/30 transition border-b border-slate-700/50"
                                                 >
                                                     <td className="px-4 py-3 text-slate-200 font-medium">
@@ -850,8 +863,6 @@ export default function TeacherDashboard() {
                                                             <span className="text-slate-400 text-sm">Added</span>
                                                         ) : (
                                                             <button
-                                                                // FIX TO
-
                                                                 onClick={() => handleAddStudentsToClass(selectedClass._id, student._id)}
                                                                 className="px-3 py-1 text-white bg-cyan-500 rounded-lg hover:bg-cyan-400 text-sm font-semibold"
                                                             >
@@ -871,11 +882,7 @@ export default function TeacherDashboard() {
                                     )}
                                 </tbody>
                             </table>
-
-
-
                         </div>
-
 
                         <div className="flex gap-3 justify-end">
                             <button
@@ -884,9 +891,8 @@ export default function TeacherDashboard() {
                                 }}
                                 className="px-6 py-2.5 text-slate-300 bg-slate-700/70 rounded-lg hover:bg-slate-600/70 transition font-semibold border border-slate-600"
                             >
-                                Cancel
+                                Close
                             </button>
-
                         </div>
                     </div>
                 </div>
