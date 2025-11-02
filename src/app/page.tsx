@@ -6,7 +6,7 @@ export default function LandingPage() {
     <div className="font-sans">
       {/* Navbar */}
       <nav className="flex justify-between items-center p-6 bg-slate-900 shadow-lg">
-        <h1 className="text-2xl font-bold text-cyan-400">Classified</h1>
+        <h1 className="text-2xl font-bold text-cyan-400">Clasified</h1>
         <div className="space-x-6">
           <a href="#features" className="text-slate-200 hover:text-cyan-400 transition">Features</a>
           <a href="#about" className="text-slate-200 hover:text-cyan-400 transition">About</a>

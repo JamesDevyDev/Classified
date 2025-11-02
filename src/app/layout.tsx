@@ -3,7 +3,7 @@ import "./globals.css";
 import Footer from "./Footer";
 
 export const metadata: Metadata = {
-  title: "Classified",
+  title: "Clasified",
   description: "Class Scheduling System",
 };
 
