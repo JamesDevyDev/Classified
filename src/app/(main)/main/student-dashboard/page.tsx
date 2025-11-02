@@ -17,6 +17,12 @@ interface Class {
     studentList: string[];
 }
 
+interface ClassLayout {
+    class: Class;
+    column: number;
+    totalColumns: number;
+}
+
 export default function StudentDashboard() {
     const { getStudentClass } = useStudentStore()
     const { getLoggedInUser, authUser } = useAuthStore();
@@ -74,6 +80,53 @@ export default function StudentDashboard() {
         return classes.filter((cls: Class) => cls.dayOfWeek === day).sort((a: Class, b: Class) =>
             a.startTime.localeCompare(b.startTime)
         );
+    };
+
+    // NEW: Function to detect overlaps and assign columns
+    const getClassLayout = (day: string): ClassLayout[] => {
+        const dayClasses = getClassesForDay(day);
+
+        if (dayClasses.length === 0) return [];
+
+        // Sort by start time
+        const sorted = [...dayClasses].sort((a, b) =>
+            a.startTime.localeCompare(b.startTime)
+        );
+
+        // Assign columns to avoid overlaps
+        const columns: Class[][] = [];
+
+        sorted.forEach(cls => {
+            // Find first column where this class doesn't overlap
+            let placed = false;
+            for (let col of columns) {
+                const hasOverlap = col.some(existing => {
+                    // Two classes overlap if one starts before the other ends
+                    return !(cls.endTime <= existing.startTime || cls.startTime >= existing.endTime);
+                });
+
+                if (!hasOverlap) {
+                    col.push(cls);
+                    placed = true;
+                    break;
+                }
+            }
+
+            // If no suitable column found, create new column
+            if (!placed) {
+                columns.push([cls]);
+            }
+        });
+
+        // Return layout info for each class
+        return sorted.map(cls => {
+            const colIndex = columns.findIndex(col => col.includes(cls));
+            return {
+                class: cls,
+                column: colIndex,
+                totalColumns: columns.length
+            };
+        });
     };
 
     const uniqueCourses = Array.from(new Set(classes.map(c => c.course)));
@@ -174,6 +227,7 @@ export default function StudentDashboard() {
                     <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700 shadow-2xl overflow-hidden">
                         <div className="bg-slate-700/50 px-6 py-4 border-b border-slate-600">
                             <h2 className="text-xl font-bold text-white">Weekly Schedule</h2>
+                            <p className="text-xs text-slate-400 mt-1">Overlapping classes are displayed side-by-side</p>
                         </div>
                         <div className="overflow-x-auto">
                             <div className="min-w-[1000px]">
@@ -203,10 +257,11 @@ export default function StudentDashboard() {
                                         </div>
                                     ))}
 
-                                    {/* Absolute positioned classes */}
+                                    {/* Absolute positioned classes with overlap handling */}
                                     {daysOfWeek.map((day, dayIndex) => {
-                                        const dayClasses = getClassesForDay(day);
-                                        return dayClasses.map((cls) => {
+                                        const classLayouts = getClassLayout(day);
+
+                                        return classLayouts.map(({ class: cls, column, totalColumns }) => {
                                             const startHour = parseInt(cls.startTime.split(':')[0]);
                                             const endHour = parseInt(cls.endTime.split(':')[0]);
                                             const startMin = parseInt(cls.startTime.split(':')[1]);
@@ -217,8 +272,9 @@ export default function StudentDashboard() {
                                             const duration = (endHour - startHour) + (endMin - startMin) / 60;
                                             const height = duration * 80;
 
-                                            const leftPosition = ((dayIndex + 1) / 6) * 100;
-                                            const width = (1 / 6) * 100;
+                                            const baseDayWidth = (1 / 6) * 100;
+                                            const columnWidth = baseDayWidth / totalColumns;
+                                            const leftPosition = ((dayIndex + 1) / 6) * 100 + (column * columnWidth);
 
                                             return (
                                                 <div
@@ -231,10 +287,10 @@ export default function StudentDashboard() {
                                                     style={{
                                                         top: `${startSlotIndex * 80 + startOffset}px`,
                                                         left: `${leftPosition}%`,
-                                                        width: `calc(${width}% - 16px)`,
+                                                        width: `calc(${columnWidth}% - ${totalColumns > 1 ? 4 : 16}px)`,
                                                         height: `${height}px`,
-                                                        marginLeft: '8px',
-                                                        marginRight: '8px',
+                                                        marginLeft: '2px',
+                                                        marginRight: '2px',
                                                     }}
                                                 >
                                                     <div className="text-white font-semibold text-sm mb-1 truncate">
@@ -244,11 +300,12 @@ export default function StudentDashboard() {
                                                         <Clock size={10} />
                                                         {formatTime(cls.startTime)} - {formatTime(cls.endTime)}
                                                     </div>
-                                                    <div className="text-white/90 text-xs flex items-center gap-1 mb-1">
-                                                        <Users size={10} />
-                                                        {cls?.teacherId?.teacherName}
-                                                    </div>
-
+                                                    {totalColumns === 1 && (
+                                                        <div className="text-white/90 text-xs flex items-center gap-1 mb-1">
+                                                            <Users size={10} />
+                                                            {cls?.teacherId?.teacherName}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             );
                                         });
@@ -279,7 +336,6 @@ export default function StudentDashboard() {
                                         <Clock size={14} className="text-slate-400" />
                                         {formatTime(cls.startTime)} - {formatTime(cls.endTime)}
                                     </p>
-
                                 </div>
                                 <button
                                     onClick={() => {
@@ -339,8 +395,8 @@ export default function StudentDashboard() {
                                     <p className="text-xs text-slate-400">Schedule</p>
                                     <p className="font-medium">{formatTime(selectedClass.startTime)} - {formatTime(selectedClass.endTime)}</p>
                                 </div>
-
                             </div>
+
                             <div className="flex items-center gap-3 text-slate-300">
                                 <div className="bg-slate-700/50 p-2 rounded-lg">
                                     <Users size={18} className="text-slate-400" />
@@ -349,7 +405,6 @@ export default function StudentDashboard() {
                                     <p className="text-xs text-slate-400">Teacher</p>
                                     <p className="font-medium">{selectedClass?.teacherId?.teacherName}</p>
                                 </div>
-
                             </div>
                         </div>
 
