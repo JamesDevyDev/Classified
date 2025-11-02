@@ -8,24 +8,22 @@ export const POST = async (req: Request) => {
         await connectDb();
 
         const { classId, studentId } = await req.json();
-        console.log(classId, studentId)
-
-       
+        console.log(classId, studentId);
 
         if (!classId || !studentId) {
-            console.log("missing params")
+            console.log("missing params");
             return NextResponse.json({ message: "Missing parameters" }, { status: 400 });
         }
 
         const cls = await Class.findById(classId);
         if (!cls) {
-            console.log("class not found")
+            console.log("class not found");
             return NextResponse.json({ message: "Class not found" }, { status: 404 });
         }
 
         const student = await Student.findById(studentId);
         if (!student) {
-            console.log("student not found")
+            console.log("student not found");
             return NextResponse.json({ message: "Student not found" }, { status: 404 });
         }
 
@@ -38,7 +36,7 @@ export const POST = async (req: Request) => {
             // Remove student from class
             cls.studentList.splice(index, 1);
             // Also remove class from student's list
-            student.class = student.class.filter((id: any) => id !== classId);
+            student.class = student.class.filter((id: any) => id.toString() !== classId);
             action = "removed";
         } else {
             // Add student to class
@@ -50,12 +48,17 @@ export const POST = async (req: Request) => {
             action = "added";
         }
 
+        // Update student count
+        cls.students = cls.studentList.length;
+
         // Save both documents
         await Promise.all([cls.save(), student.save()]);
 
-        return NextResponse.json({ success: true, action });
-
-        // return NextResponse.json("works")
+        return NextResponse.json({
+            success: true,
+            action,
+            updatedCount: cls.students,
+        });
 
     } catch (error) {
         console.error(error);

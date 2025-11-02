@@ -748,6 +748,7 @@ export default function TeacherDashboard() {
                                 <p className="text-slate-400 mb-6">No students enrolled yet.</p>
                                 <button
                                     onClick={() => {
+
                                         handleGetStudents();
                                         setShowAddStudentModal(true);
                                     }}
@@ -797,7 +798,7 @@ export default function TeacherDashboard() {
                                                 ))
                                             ) : (
                                                 <tr>
-                                                    <td  className="text-center text-gray-500">
+                                                    <td className="text-center text-gray-500">
                                                         No students enrolled
                                                     </td>
                                                 </tr>
@@ -879,7 +880,11 @@ export default function TeacherDashboard() {
                                                             <span className="text-slate-400 text-sm">Added</span>
                                                         ) : (
                                                             <button
-                                                                onClick={() => handleAddStudentsToClass(selectedClass._id, student._id)}
+
+                                                                onClick={() => {
+                                                                    setShowAddStudentModal(false);
+                                                                    handleAddStudentsToClass(selectedClass._id, student._id)
+                                                                }}
                                                                 className="px-3 py-1 text-white bg-cyan-500 rounded-lg hover:bg-cyan-400 text-sm font-semibold"
                                                             >
                                                                 Add

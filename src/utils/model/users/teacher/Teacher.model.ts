@@ -17,7 +17,7 @@ const teacherSchema = new mongoose.Schema({
   classCreated: [
     {
       type: mongoose.Schema.Types.ObjectId,  // Reference to ObjectId
-      ref: "class",  // Reference to the Class model
+      ref: "Class",  // Reference to the Class model
     },
   ],
 });
