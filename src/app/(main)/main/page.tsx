@@ -17,9 +17,9 @@ const Main = () => {
 
                 // Simulate routing delay
                 setTimeout(() => {
-                    if (user?.role === 'admin') router.push("/main/admin-dashboard")
-                    else if (user?.role === 'student') router.push("/main/student-dashboard")
-                    else if (user?.role === 'teacher') router.push("/main/teacher-dashboard")
+                    if (user?.role === 'admin') router.push("/main/admin/admin-dashboard")
+                    else if (user?.role === 'student') router.push("/main/student/student-dashboard")
+                    else if (user?.role === 'teacher') router.push("/main/teacher/teacher-dashboard")
                     else setLoading(false)
                 }, 2000)
             } catch (error) {

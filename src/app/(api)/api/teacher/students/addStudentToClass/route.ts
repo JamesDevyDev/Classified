@@ -2,10 +2,14 @@ import { NextResponse } from "next/server";
 import connectDb from "@/utils/connectDb";
 import Class from "@/utils/model/class/teacher/Class.Model";
 import Student from "@/utils/model/users/student/Student.model";
+import Logs from "@/utils/model/logs/Logs.Model";
+import { getAuthenticatedUser } from "@/utils/verifyUser";
 
 export const POST = async (req: Request) => {
     try {
         await connectDb();
+
+        const authenticatedUser = await getAuthenticatedUser()
 
         const { classId, studentId } = await req.json();
         console.log(classId, studentId);
@@ -53,6 +57,17 @@ export const POST = async (req: Request) => {
 
         // Save both documents
         await Promise.all([cls.save(), student.save()]);
+
+        // ✅ Log teacher action
+        await Logs.create({
+            action: action === "added" ? "Student Added to Class" : "Student Removed from Class",
+            teacherId: authenticatedUser.user._id,
+            details:
+                action === "added"
+                    ? `Teacher "${authenticatedUser.user.teacherName}" added student "${student.studentName}" to class "${cls.course}"`
+                    : `Teacher "${authenticatedUser.user.teacherName}" removed student "${student.studentName}" from class "${cls.course}"`,
+            type: action === "added" ? "create" : "delete",
+        });
 
         return NextResponse.json({
             success: true,

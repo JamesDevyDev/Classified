@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import connectDb from "@/utils/connectDb";
 import Student from "@/utils/model/users/student/Student.model";
 import { getAuthenticatedUser } from "@/utils/verifyUser";
+import Logs from "@/utils/model/logs/Logs.Model";
 
 export const DELETE = async (req: Request) => {
     try {
@@ -25,6 +26,14 @@ export const DELETE = async (req: Request) => {
         if (!deleting) {
             return NextResponse.json("Student not found.", { status: 404 });
         }
+
+        // 🧾 Create a log entry after successful deletion
+        await Logs.create({
+            action: "Delete Student",
+            userId: authenticatedUser.user._id,
+            details: `Deleted student ${deleting.studentName} (ID: ${deleting._id})`,
+            type: "deletion",
+        });
 
         return NextResponse.json(
             { message: `Student ${deleting.studentName} deleted successfully.` },

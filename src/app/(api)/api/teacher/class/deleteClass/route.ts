@@ -3,13 +3,16 @@ import connectDb from "@/utils/connectDb";
 import Class from "@/utils/model/class/teacher/Class.Model";
 import Teacher from "@/utils/model/users/teacher/Teacher.model";
 import Student from "@/utils/model/users/student/Student.model";
+import Logs from "@/utils/model/logs/Logs.Model";
+import { getAuthenticatedUser } from "@/utils/verifyUser";
 
 export const DELETE = async (req: Request) => {
     try {
         await connectDb();
+        const authenticatedUser = await getAuthenticatedUser()
 
         const body = await req.json();
-        const { id } = body;
+        const { id, userId } = body; // ✅ include userId in request body
 
         // 1️⃣ Find the class first to get teacherId and studentList
         const existingClass = await Class.findById(id);
@@ -17,7 +20,7 @@ export const DELETE = async (req: Request) => {
             return NextResponse.json("Class not found", { status: 404 });
         }
 
-        const { teacherId, studentList } = existingClass;
+        const { teacherId, studentList, name } = existingClass;
 
         // 2️⃣ Delete the class document itself
         await Class.findByIdAndDelete(id);
@@ -37,6 +40,14 @@ export const DELETE = async (req: Request) => {
                 { $pull: { class: id } }
             );
         }
+
+        // 5️⃣ Log deletion
+        await Logs.create({
+            action: `Deleted class "${existingClass.course}"`,
+            teacherId: authenticatedUser.user._id,
+            details: `Class "${existingClass.course}" and its references were deleted.`,
+            type: "delete",
+        });
 
         return NextResponse.json("Class deleted successfully", { status: 200 });
     } catch (error) {

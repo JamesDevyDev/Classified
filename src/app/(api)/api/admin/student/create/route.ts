@@ -3,11 +3,12 @@ import connectDb from "@/utils/connectDb"
 import Student from "@/utils/model/users/student/Student.model"
 import { getAuthenticatedUser } from "@/utils/verifyUser"
 import bcrypt from "bcrypt"
+import Logs from "@/utils/model/logs/Logs.Model"
 
 export const POST = async (req: Request) => {
     try {
         const body = await req.json()
-        const { studentName, password  } = body
+        const { studentName, password } = body
 
         await connectDb()
 
@@ -21,7 +22,7 @@ export const POST = async (req: Request) => {
             return NextResponse.json("Error. You need to be ADMIN to do this.", { status: 400 })
         }
 
-     
+
         const ifExist = await Student.findOne({ studentName })
         if (ifExist) {
             return NextResponse.json("Student Name already exists.", { status: 400 })

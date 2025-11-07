@@ -11,6 +11,8 @@ interface AdminStore {
     deleteTeacher: (id: string) => Promise<any>
     getTeacher: () => Promise<any>
 
+    getAllLogs: () => Promise<any>
+
 }
 
 const useAdminStore = create<AdminStore>((set, get) => ({
@@ -105,6 +107,18 @@ const useAdminStore = create<AdminStore>((set, get) => ({
             console.log(error)
         }
     },
+
+    getAllLogs: async () => {
+        try {
+            let res = await fetch("/api/admin/logs")
+            if (!res.ok) return console.error("Error with the fetch")
+
+            const data = await res.json()
+            return data
+        } catch (error) {
+            console.log(error)
+        }
+    }
 }))
 
 export default useAdminStore

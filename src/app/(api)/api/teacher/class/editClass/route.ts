@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import Class from "@/utils/model/class/teacher/Class.Model";
 import connectDb from "@/utils/connectDb";
+import Logs from "@/utils/model/logs/Logs.Model";
+import { getAuthenticatedUser } from "@/utils/verifyUser";
 
 // Validate 24-hour time format (HH:MM)
 function isValid24HourTime(time: string): boolean {
@@ -11,12 +13,8 @@ function isValid24HourTime(time: string): boolean {
 // Convert "6:00 PM" to "18:00" (for backward compatibility)
 function convertTo24Hour(time: string): string | null {
     try {
-        // Check if already in 24-hour format
-        if (isValid24HourTime(time)) {
-            return time;
-        }
+        if (isValid24HourTime(time)) return time;
 
-        // Try 12-hour format
         const match = time.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
         if (!match) return null;
 
@@ -35,7 +33,8 @@ function convertTo24Hour(time: string): string | null {
 
 export const PATCH = async (req: Request) => {
     try {
-        await connectDb()
+        await connectDb();
+        const authenticatedUser = await getAuthenticatedUser();
 
         const body = await req.json();
         const { id, course, dayOfWeek, startTime, endTime, color } = body;
@@ -82,7 +81,6 @@ export const PATCH = async (req: Request) => {
                 }, { status: 400 });
             }
 
-            // Validate time range 06:00–22:00
             if (newStartTime && newStartTime < "06:00") {
                 return NextResponse.json({
                     error: "Start time must be at or after 6:00 AM."
@@ -95,7 +93,6 @@ export const PATCH = async (req: Request) => {
                 }, { status: 400 });
             }
 
-            // Ensure start < end
             if (newStartTime && newEndTime && newStartTime >= newEndTime) {
                 return NextResponse.json({
                     error: "End time must be later than start time."
@@ -121,6 +118,14 @@ export const PATCH = async (req: Request) => {
             { $set: updateData },
             { new: true, runValidators: true }
         );
+
+        // ✅ Log the edit action
+        await Logs.create({
+            action: `Edited class "${existingClass.course}"`,
+            teacherId: authenticatedUser.user._id,
+            details: `Class "${existingClass.course}" was updated.`,
+            type: "update",
+        });
 
         return NextResponse.json({
             message: "Class updated successfully.",

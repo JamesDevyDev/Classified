@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import Class from "@/utils/model/class/teacher/Class.Model";
-import '../../../../../../utils/model/users/teacher/Teacher.model';
 import connectDb from "@/utils/connectDb";
+import Class from "@/utils/model/class/teacher/Class.Model";
+import Teacher from "@/utils/model/users/teacher/Teacher.model";
+import Logs from "@/utils/model/logs/Logs.Model";
 
 // Validate 24-hour time format (HH:MM)
 function isValid24HourTime(time: string): boolean {
@@ -9,15 +10,11 @@ function isValid24HourTime(time: string): boolean {
     return match !== null;
 }
 
-// Convert "6:00 PM" to "18:00" (for backward compatibility)
+// Convert "6:00 PM" to "18:00"
 function convertTo24Hour(time: string): string | null {
     try {
-        // Check if already in 24-hour format
-        if (isValid24HourTime(time)) {
-            return time;
-        }
+        if (isValid24HourTime(time)) return time;
 
-        // Try 12-hour format
         const match = time.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
         if (!match) return null;
 
@@ -36,7 +33,7 @@ function convertTo24Hour(time: string): string | null {
 
 export const POST = async (req: Request) => {
     try {
-        await connectDb()
+        await connectDb();
 
         const body = await req.json();
         const { teacherId, course, dayOfWeek, startTime, endTime, students, color, studentList } = body;
@@ -44,6 +41,12 @@ export const POST = async (req: Request) => {
         // ✅ Check required fields
         if (!teacherId || !course || !dayOfWeek || !startTime || !endTime || color === undefined) {
             return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
+        }
+
+        // ✅ Validate teacher
+        const teacher = await Teacher.findById(teacherId);
+        if (!teacher) {
+            return NextResponse.json({ error: "Teacher not found." }, { status: 404 });
         }
 
         // ✅ Monday–Friday validation
@@ -58,51 +61,36 @@ export const POST = async (req: Request) => {
             return NextResponse.json({ error: "Invalid color option." }, { status: 400 });
         }
 
-        // ✅ Convert time to 24-hour format (handles both formats)
+        // ✅ Convert time to 24-hour format
         const start24 = convertTo24Hour(startTime);
         const end24 = convertTo24Hour(endTime);
 
         if (!start24 || !end24) {
             return NextResponse.json({
-                error: "Invalid time format. Use 24-hour format (HH:MM) or 12-hour format (hh:mm AM/PM)."
+                error: "Invalid time format. Use 24-hour (HH:MM) or 12-hour (hh:mm AM/PM)."
             }, { status: 400 });
         }
 
-        // ✅ Ensure time range 06:00–22:00 only
-        const startHour = parseInt(start24.split(':')[0]);
-        const endHour = parseInt(end24.split(':')[0]);
-        const endMinutes = parseInt(end24.split(':')[1]);
-
-        // Start time must be >= 06:00
+        // ✅ Ensure valid range 06:00–22:00
         if (start24 < "06:00") {
-            return NextResponse.json({
-                error: "Start time must be at or after 6:00 AM."
-            }, { status: 400 });
+            return NextResponse.json({ error: "Start time must be at or after 6:00 AM." }, { status: 400 });
         }
 
-        // End time must be <= 22:00 (allow exactly 22:00)
         if (end24 > "22:00") {
-            return NextResponse.json({
-                error: "End time must be at or before 10:00 PM."
-            }, { status: 400 });
+            return NextResponse.json({ error: "End time must be at or before 10:00 PM." }, { status: 400 });
         }
 
-        // ✅ Ensure start < end
         if (start24 >= end24) {
-            return NextResponse.json({
-                error: "End time must be later than start time."
-            }, { status: 400 });
+            return NextResponse.json({ error: "End time must be later than start time." }, { status: 400 });
         }
 
-        // ✅ Students count validation (use 0 as default if not provided)
         const studentCount = typeof students === "number" ? students : 0;
         if (studentCount < 0) {
-            return NextResponse.json({
-                error: "Students count cannot be negative."
-            }, { status: 400 });
+            return NextResponse.json({ error: "Students count cannot be negative." }, { status: 400 });
         }
 
-        const newClass = new Class({
+        // ✅ Create the class
+        const newClass = await Class.create({
             teacherId,
             course,
             dayOfWeek,
@@ -113,7 +101,13 @@ export const POST = async (req: Request) => {
             studentList: studentList || [],
         });
 
-        await newClass.save();
+        // ✅ Create log entry
+        await Logs.create({
+            action: "Class Created",
+            teacherId: teacher._id,
+            details: `Teacher "${teacher.teacherName}" created class "${course}" on ${dayOfWeek} (${start24}–${end24}).`,
+            type: "create",
+        });
 
         return NextResponse.json({
             message: "Class created successfully.",

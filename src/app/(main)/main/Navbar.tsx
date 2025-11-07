@@ -11,20 +11,28 @@ const Navbar = () => {
 
     useEffect(() => {
         getLoggedInUser()
-    }, [])
+    }, [getLoggedInUser])
+
+    useEffect(() => {
+        console.log(authUser)
+    }, [authUser])
 
     return (
         <nav className="flex flex-col md:flex-row justify-between items-center p-4 md:p-6 bg-slate-900 shadow-lg gap-4 border-b border-slate-700">
             <h1 className="text-2xl font-bold text-cyan-400">
-                Clasified 
+                Clasified
             </h1>
             <div className="flex flex-col md:flex-row gap-3 md:gap-6 items-center">
-                <a href="/admin-dashboard" className="text-slate-300 hover:text-cyan-400 transition font-medium">
+
+                <a href="/main" className="text-slate-300 hover:text-cyan-400 transition font-medium">
                     Dashboard
                 </a>
-                <a href="/profile" className="text-slate-300 hover:text-cyan-400 transition font-medium">
-                    Profile
-                </a>
+
+                {authUser?.role === 'admin' &&
+                    <a href="/main/admin/admin-logs" className="text-slate-300 hover:text-cyan-400 transition font-medium">
+                        Logs
+                    </a>}
+
                 <button
                     className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-6 py-2 rounded-lg hover:from-cyan-400 hover:to-blue-400 cursor-pointer transition shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 font-semibold"
                     onClick={() => {
